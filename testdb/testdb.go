@@ -51,12 +51,15 @@ func OpenTestConnection(cfg *gorm.Config) (db *gorm.DB, err error) {
 
 func Migrations() {
 	var err error
+
 	allModels := []interface{}{&Parent{}, &Child{}}
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(allModels), func(i, j int) { allModels[i], allModels[j] = allModels[j], allModels[i] })
-	err = DB.Migrator().DropTable("user_friends", "user_speaks")
-	err = DB.Migrator().DropTable(allModels...)
-	if err != nil {
+	if err = DB.Migrator().DropTable("user_friends", "user_speaks"); err != nil {
+		log.Printf("Failed to drop table, got error %v\n", err)
+		os.Exit(1)
+	}
+	if err = DB.Migrator().DropTable(allModels...); err != nil {
 		log.Printf("Failed to drop table, got error %v\n", err)
 		os.Exit(1)
 	}

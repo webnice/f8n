@@ -63,6 +63,9 @@ func TestGormNil(t *testing.T) {
 	if orm, err = f8n.Gorm(orm); err == nil {
 		t.Errorf("Gorm(). Ожидалась ошибка.")
 	}
+	if orm != nil {
+		t.Errorf("Gorm(). Ожидался объект равный nil.")
+	}
 	if ero, ok = err.(Err); !ok {
 		t.Errorf("Gorm() = %q, не верный тип ошибки.", err)
 		return
