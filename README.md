@@ -1,9 +1,7 @@
 # Filtration
 
 ---
-[![GoDoc](https://godoc.org/gopkg.in/webnice/f8n.v1/f8n?status.svg)](https://godoc.org/gopkg.in/webnice/f8n.v1/f8n)
-[![Go Report Card](https://goreportcard.com/badge/gopkg.in/webnice/f8n.v1)](https://goreportcard.com/report/gopkg.in/webnice/f8n.v1)
-[![Coverage Status](https://coveralls.io/repos/github/webnice/f8n/badge.svg?branch=v1)](https://coveralls.io/github/webnice/f8n?branch=v1)
+[![Go Report Card](https://goreportcard.com/badge/github.com/webnice/f8n)](https://goreportcard.com/report/github.com/webnice/f8n)
 
 ### filtration -> f[iltratio]n -> f[8]n -> f8n
 
