@@ -52,9 +52,13 @@ func (filter Filter) queryGorm() (query string, values []interface{}) {
 		values = append(values, filter.Value.Value())
 	case filterLikeThan:
 		_, _ = q.WriteString(" LIKE ?")
+		filter.Value.Source = strings.ReplaceAll(filter.Value.Source, "*", "%")
+		filter.Value.Source = strings.ReplaceAll(filter.Value.Source, "?", "_")
 		values = append(values, filter.Value.Value())
 	case filterNotLikeThan:
 		_, _ = q.WriteString(" NOT LIKE ?")
+		filter.Value.Source = strings.ReplaceAll(filter.Value.Source, "*", "%")
+		filter.Value.Source = strings.ReplaceAll(filter.Value.Source, "?", "_")
 		values = append(values, filter.Value.Value())
 	//case filterIn:
 	//	_, _ = q.WriteString()
