@@ -21,10 +21,10 @@ func (filter Filter) exportAsString() (ret string) {
 }
 
 // Выполнение замены символов в значении фильтрации для запросов SQL LIKE.
-func (filter Filter) queryGormValueLike() (ret string) {
-	ret = strings.Replace(filter.Value.String(), "?", "_", -1)
+func (filter Filter) queryGormValueLike() interface{} {
+	var ret = strings.Replace(filter.Value.String(), "?", "_", -1)
 	ret = strings.Replace(ret, "*", "%", -1)
-	return
+	return ret
 }
 
 // Формирование SQL запроса и параметров для ORM GORM.
@@ -52,14 +52,10 @@ func (filter Filter) queryGorm() (query string, values []interface{}) {
 		values = append(values, filter.Value.Value())
 	case filterLikeThan:
 		_, _ = q.WriteString(" LIKE ?")
-		filter.Value.Source = strings.ReplaceAll(filter.Value.Source, "*", "%")
-		filter.Value.Source = strings.ReplaceAll(filter.Value.Source, "?", "_")
-		values = append(values, filter.Value.Value())
+		values = append(values, filter.queryGormValueLike())
 	case filterNotLikeThan:
 		_, _ = q.WriteString(" NOT LIKE ?")
-		filter.Value.Source = strings.ReplaceAll(filter.Value.Source, "*", "%")
-		filter.Value.Source = strings.ReplaceAll(filter.Value.Source, "?", "_")
-		values = append(values, filter.Value.Value())
+		values = append(values, filter.queryGormValueLike())
 	//case filterIn:
 	//	_, _ = q.WriteString()
 	//case filterNotIn:
