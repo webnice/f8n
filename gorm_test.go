@@ -1,8 +1,8 @@
-// Package f8n
 package f8n
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -10,8 +10,6 @@ import (
 	"testing"
 
 	"github.com/webnice/f8n/testdb"
-
-	ddd "github.com/webnice/debug"
 
 	"gorm.io/gorm"
 )
@@ -70,11 +68,10 @@ func TestGormNil(t *testing.T) {
 		t.Errorf("Gorm() = %q, не верный тип ошибки.", err)
 		return
 	}
-	if ero.Anchor() != f8n.Errors().OrmIsNil().Anchor() {
+	if !errors.Is(ero.Anchor(), f8n.Errors().OrmIsNil().Anchor()) {
 		t.Errorf("Gorm(). Ошибка: %q, ожидалась: %q", ero.Error(), f8n.Errors().OrmIsNil().Error())
 		return
 	}
-
 }
 
 // Тестирование создания ORM условий запроса.
@@ -116,7 +113,6 @@ func TestGorm(t *testing.T) {
 			},
 		}
 	)
-
 	f8n, orm = New(), testGorm(t)
 	for n = range tests {
 		// Создание запроса.
@@ -147,6 +143,4 @@ func TestGorm(t *testing.T) {
 			t.Errorf("Получен запрос:\n %q, ожидался:\n %q", rexQuery[3], tests[n].Query)
 		}
 	}
-
-	ddd.Nop()
 }

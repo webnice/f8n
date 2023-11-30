@@ -1,4 +1,3 @@
-// Package testdb
 package testdb
 
 import (
