@@ -18,14 +18,15 @@ var (
 
 // Объект сущности, реализующий интерфейс Interface.
 type impl struct {
-	FieldOnly []string    `json:"field"`      // Имена обрабатываемых полей. Пусто - обрабатываются все поля.
-	Datatype  Datatype    `json:"field_type"` // Карта типов данных полей.
-	Remap     Remap       `json:"remap"`      // Переопределение наименований полей.
-	Offset    uint64      `json:"offset"`     // Лимит - позиция выборки.
-	Limit     uint64      `json:"limit"`      // Лимит - размер выборки.
-	By        []Direction `json:"by"`         // Опции сортировки результата выборки.
-	Filter    []Filter    `json:"filter"`     // Простая фильтрация.
-	Map       *Map        `json:"map"`        // Сложная фильтрация разобранная в карту DOM объектов.
+	FieldOnly []string    `json:"field"`         // Имена обрабатываемых полей. Пусто - обрабатываются все поля.
+	Datatype  Datatype    `json:"field_type"`    // Карта типов данных полей.
+	Remap     Remap       `json:"remap"`         // Переопределение наименований полей.
+	Offset    uint64      `json:"offset"`        // Лимит - позиция выборки.
+	Limit     uint64      `json:"limit"`         // Лимит - размер выборки.
+	By        []Direction `json:"by"`            // Опции сортировки результата выборки.
+	Filter    []Filter    `json:"filter"`        // Простая фильтрация.
+	Tie       TieMode     `json:"tie,omitempty"` // Устаревший режим простой фильтрации.
+	Map       *Map        `json:"map"`           // Сложная фильтрация разобранная в карту DOM объектов.
 }
 
 // ParseError Ошибки возникшие в результате разбора входящих параметров.
@@ -76,3 +77,6 @@ type FilterValue struct {
 	Source string    `json:"source"` // Исходное значение фильтрации.
 	Type   FieldType `json:"type"`   // Тип значения.
 }
+
+// TieMode Устаревший режим работы простой фильтрации.
+type TieMode string

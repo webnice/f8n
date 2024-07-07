@@ -106,3 +106,20 @@ func parseFilterMethod(s string) (ret FilterMethod) {
 
 	return
 }
+
+// String Реализация интерфейса Stringify.
+func (tmo TieMode) String() string { return string(tmo) }
+
+// Разбор строки в тип режима фильтрации.
+func parseTie(s string) (ret TieMode) {
+	switch strings.TrimSpace(strings.ToLower(s)) {
+	case tieAnd.String():
+		ret = tieAnd
+	case tieOr.String():
+		ret = tieOr
+	default:
+		ret = tieUnknown
+	}
+
+	return
+}

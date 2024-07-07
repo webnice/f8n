@@ -9,6 +9,8 @@ const (
 	eMultipleErrorsFound
 	eLimitReceivedMoreThanOne
 	eLimitInvalidValue
+	eTieModeThanOne
+	eTieModeInvalidValue
 	eValueCannotBeNegative
 	eByFormat
 	eByDirectionUnknown
@@ -33,6 +35,8 @@ const (
 	cMultipleErrorsFound               = `Найдены множественные ошибки.`
 	cLimitReceivedMoreThanOne          = `Получено больше одного значения лимита. Поддерживается только одно значение лимита.`
 	cLimitInvalidValue                 = `Получено недопустимое значение лимита %q, ошибка: %s.`
+	cTieModeThanOne                    = `Получено больше одного значения режима фильтрации. Поддерживается только одно значение режима фильтрации.`
+	cTieModeInvalidValue               = `Получено недопустимое значение режима фильтрации %q, ошибка: %s.`
 	cValueCannotBeNegative             = `Передано значение %d, значение не может быть отрицательным.`
 	cByFormat                          = `Формат значения сортировки не верный.`
 	cByDirectionUnknown                = `Неизвестный порядок сортировки %q, ожидался asc или desc.`
@@ -59,6 +63,8 @@ var (
 	errMultipleErrorsFound               = err{tpl: cMultipleErrorsFound, code: eMultipleErrorsFound}
 	errLimitReceivedMoreThanOne          = err{tpl: cLimitReceivedMoreThanOne, code: eLimitReceivedMoreThanOne}
 	errLimitInvalidValue                 = err{tpl: cLimitInvalidValue, code: eLimitInvalidValue}
+	errTieModeThanOne                    = err{tpl: cTieModeThanOne, code: eTieModeThanOne}
+	errTieModeInvalidValue               = err{tpl: cTieModeInvalidValue, code: eTieModeInvalidValue}
 	errValueCannotBeNegative             = err{tpl: cValueCannotBeNegative, code: eValueCannotBeNegative}
 	errByFormat                          = err{tpl: cByFormat, code: eByFormat}
 	errByDirectionUnknown                = err{tpl: cByDirectionUnknown, code: eByDirectionUnknown}
@@ -95,6 +101,15 @@ func (e *Error) LimitReceivedMoreThanOne() Err { return newErr(&errLimitReceived
 // LimitInvalidValue Получено недопустимое значение лимита: ...
 func (e *Error) LimitInvalidValue(s string, err error) Err {
 	return newErr(&errLimitInvalidValue, 0, s, err)
+}
+
+// TieModeThanOne Получено больше одного значения режима фильтрации. Поддерживается только одно значение режима
+// фильтрации.
+func (e *Error) TieModeThanOne() Err { return newErr(&errTieModeThanOne, 0) }
+
+// TieModeInvalidValue Получено недопустимое значение режима фильтрации ..., ошибка: ...
+func (e *Error) TieModeInvalidValue(s string, err error) Err {
+	return newErr(&errTieModeInvalidValue, 0, s, err)
 }
 
 // ValueCannotBeNegative Передано значение ..., значение не может быть отрицательным.

@@ -4,6 +4,7 @@ const (
 	keyLimit     = "limit"  // Наименование параметра с лимитом.
 	keyBy        = "by"     // Наименование параметра с сортировкой.
 	keyFilter    = "filter" // Наименование параметра с фильтром.
+	keyTie       = "tie"    // Устаревший режим работы фильтрации. Для совместимости.
 	keyMap       = "map"    // Наименование параметра с логической картой.
 	keyDelimiter = ":"      // Разделитель и ограничитель.
 	keyOr        = ":or:"   // Логическое "ИЛИ".
@@ -14,48 +15,59 @@ const (
 
 const (
 	// Неизвестный метод фильтрации.
-	filterUnknown = FilterMethod(``)
+	filterUnknown = FilterMethod("")
 
 	// Равно.
-	filterEquivalent = FilterMethod(`eq`)
+	filterEquivalent = FilterMethod("eq")
 
 	// Меньше.
-	filterLessThan = FilterMethod(`lt`)
+	filterLessThan = FilterMethod("lt")
 
 	// Меньше или равно.
-	filterLessThanOrEquivalent = FilterMethod(`le`)
+	filterLessThanOrEquivalent = FilterMethod("le")
 
 	// Больше.
-	filterGreaterThan = FilterMethod(`gt`)
+	filterGreaterThan = FilterMethod("gt")
 
 	// Больше или равно.
-	filterGreaterThanOrEquivalent = FilterMethod(`ge`)
+	filterGreaterThanOrEquivalent = FilterMethod("ge")
 
 	// Не равно.
-	filterNotEquivalent = FilterMethod(`ne`)
+	filterNotEquivalent = FilterMethod("ne")
 
 	// Похоже.
-	filterLikeThan = FilterMethod(`ke`)
+	filterLikeThan = FilterMethod("ke")
 
 	// Не похоже.
-	filterNotLikeThan = FilterMethod(`kn`)
+	filterNotLikeThan = FilterMethod("kn")
 
 	// Идентификаторы из списка.
-	filterIn = FilterMethod(`in`)
+	filterIn = FilterMethod("in")
 
 	// Идентификаторы не из списка.
-	filterNotIn = FilterMethod(`ni`)
+	filterNotIn = FilterMethod("ni")
 )
 
 const (
 	// Неизвестный порядок сортировки.
-	byUnknown = ByDirection(``)
+	byUnknown = ByDirection("")
 
 	// Прямой порядок сортировки.
-	byAsc = ByDirection(`asc`)
+	byAsc = ByDirection("asc")
 
 	// Обратный порядок сортировки.
-	byDesc = ByDirection(`desc`)
+	byDesc = ByDirection("desc")
+)
+
+const (
+	// Неизвестный режим.
+	tieUnknown = TieMode("")
+
+	// Режим "И" (по умолчанию).
+	tieAnd = TieMode("and")
+
+	// Режим "ИЛИ".
+	tieOr = TieMode("or")
 )
 
 const (

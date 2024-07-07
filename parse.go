@@ -46,6 +46,14 @@ func (f8n *impl) ParseRequest(rq *http.Request, errorFn ...OnErrorFunc) (err err
 	if tmp = f8n.ParseMap(rq); len(tmp) > 0 {
 		ers = append(ers, tmp...)
 	}
+	// Если нет сложной фильтрации, ДЛЯ СОВМЕСТИМОСТИ - загрузка устаревшего режима фильтрации - tie.
+	// Переключение режима фильтрации TIE не совместимо с MAP.
+	if f8n.Map == nil {
+		// Загрузка устаревшего режима фильтрации - tie.
+		if tmp = f8n.ParseTie(rq); len(tmp) > 0 {
+			ers = append(ers, tmp...)
+		}
+	}
 	if len(ers) == 0 {
 		return
 	}

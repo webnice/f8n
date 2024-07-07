@@ -45,13 +45,22 @@ func (f8n *impl) gormFilter(orm *gorm.DB) (ret *gorm.DB) {
 		n    int
 		t, q string
 		v    []interface{}
+		or   bool
+		cond *gorm.DB
 	)
 
-	defer func() { ret = orm }()
+	cond = orm
+	defer func() { ret = orm.Where(cond) }()
+	or = f8n.Map == nil && f8n.Tie == tieOr // Устаревший режим фильтрации применяется только если нет MAP.
 	for n = range f8n.Filter {
 		t = f8n.fieldName(f8n.Filter[n].Field)
 		q, v = f8n.Filter[n].queryGorm()
-		orm = orm.Where(t+q, v...)
+		switch {
+		case or && n > 0:
+			cond = cond.Or(t+q, v...)
+		default:
+			cond = cond.Where(t+q, v...)
+		}
 	}
 
 	return
