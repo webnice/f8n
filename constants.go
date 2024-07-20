@@ -9,6 +9,7 @@ const (
 	keyDelimiter = ":"      // Разделитель и ограничитель.
 	keyOr        = ":or:"   // Логическое "ИЛИ".
 	keyAnd       = ":and:"  // Логическое "И".
+	keyNilValue  = "nil"    // Значение определяющие nil.
 	pairBeg      = "("      // Начало операторных скобок.
 	pairEnd      = ")"      // Окончание операторных скобок.
 )
@@ -71,23 +72,41 @@ const (
 )
 
 const (
-	// TypeString Тип поля string, по умолчанию для всех полей у которых не указан иноф тип данных.
+	// TypeString Тип поля string, по умолчанию для всех полей у которых не указан иной тип данных.
 	TypeString = FieldType("string")
+
+	// TypeStringNil Тип поля string, который в базе данных может быть NULL.
+	TypeStringNil = FieldType("string-or-nil")
 
 	// TypeUint64 Тип поля uint64.
 	TypeUint64 = FieldType("uint64")
 
+	// TypeUint64Nil Тип поля uint64, который в базе данных может быть NULL.
+	TypeUint64Nil = FieldType("uint64-or-nil")
+
 	// TypeInt64 Тип поля int64.
 	TypeInt64 = FieldType("int64")
+
+	// TypeInt64Nil Тип поля int64, который в базе данных может быть NULL.
+	TypeInt64Nil = FieldType("int64-or-nil")
 
 	// TypeFloat64 Тип поля float64.
 	TypeFloat64 = FieldType("float64")
 
+	// TypeFloat64Nil Тип поля float64, который в базе данных может быть NULL.
+	TypeFloat64Nil = FieldType("float64-or-nil")
+
 	// TypeBool Тип поля bool.
 	TypeBool = FieldType("bool")
 
+	// TypeBoolNil Тип поля bool, который в базе данных может быть NULL.
+	TypeBoolNil = FieldType("bool-or-nil")
+
 	// TypeTime Тип поля time.
 	TypeTime = FieldType("time")
+
+	// TypeTimeNil Тип поля time, который в базе данных может быть NULL.
+	TypeTimeNil = FieldType("time-or-nil")
 
 	// TypeArrayInt64 Тип поля int64 для SQL IN.
 	//TypeArrayInt64 = FieldType("array_int64")

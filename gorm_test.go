@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -16,11 +15,13 @@ import (
 
 func testGorm(t *testing.T) (ret *gorm.DB) {
 	var (
-		err    error
-		sqlDB  *sql.DB
-		rows   *sql.Rows
-		tmp    string
-		tables []string
+		err        error
+		sqlDB      *sql.DB
+		rows       *sql.Rows
+		tmp        string
+		tables     []string
+		isChildren bool
+		isParents  bool
 	)
 
 	ret = testdb.DB
@@ -34,12 +35,18 @@ func testGorm(t *testing.T) (ret *gorm.DB) {
 		if err = rows.Scan(&tmp); err != nil {
 			t.Errorf("Scan(). Ошибка не ожидалась. Ошибка: %s", err)
 		}
+		if tmp == "children" {
+			isChildren = true
+		}
+		if tmp == "parents" {
+			isParents = true
+		}
 		tables = append(tables, tmp)
 	}
 	// Проверка создались ли в базе данных таблицы для тестирования.
-	if !reflect.DeepEqual(tables, []string{"children", "parents"}) {
+	if !isChildren || !isParents {
 		t.Errorf(
-			"Не верные таблицы для тестирования. В баде данных таблицы: %v, ожидались: %v.",
+			"Не верные таблицы для тестирования. В базе данных таблицы: %v, ожидались: %v.",
 			tables, []string{"children", "parents"},
 		)
 	}

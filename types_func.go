@@ -18,6 +18,16 @@ func (fto FieldType) String() string { return string(fto) }
 // String Реализация интерфейса Stringify.
 func (fvo FilterValue) String() string { return fvo.Source }
 
+// IsValueNil Возвращает "Истина" если поле может принимать значения NIL и получено значение фильтрации nil.
+func (fvo FilterValue) IsValueNil() (ret bool) {
+	switch fvo.Type {
+	case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+		ret = strings.ToLower(fvo.Source) == keyNilValue
+	}
+
+	return
+}
+
 // Value Возвращения значения в типе указанном у значения.
 func (fvo FilterValue) Value() (ret interface{}) {
 	var err error

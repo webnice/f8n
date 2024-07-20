@@ -32,29 +32,101 @@ func (filter Filter) queryGorm() (query string, values []interface{}) {
 
 	switch filter.Method {
 	case filterEquivalent:
-		_, _ = q.WriteString(" = ?")
-		values = append(values, filter.Value.Value())
+		switch filter.Value.Type {
+		case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+			if filter.Value.IsValueNil() {
+				_, _ = q.WriteString(" IS NULL")
+				break
+			}
+			fallthrough
+		default:
+			_, _ = q.WriteString(" = ?")
+			values = append(values, filter.Value.Value())
+		}
 	case filterLessThan:
-		_, _ = q.WriteString(" < ?")
-		values = append(values, filter.Value.Value())
+		switch filter.Value.Type {
+		case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+			if filter.Value.IsValueNil() {
+				// Фильтрация '< ?', для значения NULL не имеет смысла.
+				break
+			}
+			fallthrough
+		default:
+			_, _ = q.WriteString(" < ?")
+			values = append(values, filter.Value.Value())
+		}
 	case filterLessThanOrEquivalent:
-		_, _ = q.WriteString(" <= ?")
-		values = append(values, filter.Value.Value())
+		switch filter.Value.Type {
+		case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+			if filter.Value.IsValueNil() {
+				// Фильтрация '<= ?', для значения NULL не имеет смысла.
+				break
+			}
+			fallthrough
+		default:
+			_, _ = q.WriteString(" <= ?")
+			values = append(values, filter.Value.Value())
+		}
 	case filterGreaterThan:
-		_, _ = q.WriteString(" > ?")
-		values = append(values, filter.Value.Value())
+		switch filter.Value.Type {
+		case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+			if filter.Value.IsValueNil() {
+				// Фильтрация '> ?', для значения NULL не имеет смысла.
+				break
+			}
+			fallthrough
+		default:
+			_, _ = q.WriteString(" > ?")
+			values = append(values, filter.Value.Value())
+		}
 	case filterGreaterThanOrEquivalent:
-		_, _ = q.WriteString(" >= ?")
-		values = append(values, filter.Value.Value())
+		switch filter.Value.Type {
+		case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+			if filter.Value.IsValueNil() {
+				// Фильтрация '>= ?', для значения NULL не имеет смысла.
+				break
+			}
+			fallthrough
+		default:
+			_, _ = q.WriteString(" >= ?")
+			values = append(values, filter.Value.Value())
+		}
 	case filterNotEquivalent:
-		_, _ = q.WriteString(" != ?")
-		values = append(values, filter.Value.Value())
+		switch filter.Value.Type {
+		case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+			if filter.Value.IsValueNil() {
+				_, _ = q.WriteString(" IS NOT NULL")
+				break
+			}
+			fallthrough
+		default:
+			_, _ = q.WriteString(" != ?")
+			values = append(values, filter.Value.Value())
+		}
 	case filterLikeThan:
-		_, _ = q.WriteString(" LIKE ?")
-		values = append(values, filter.queryGormValueLike())
+		switch filter.Value.Type {
+		case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+			if filter.Value.IsValueNil() {
+				// Фильтрация 'LIKE ?', для значения NULL не имеет смысла.
+				break
+			}
+			fallthrough
+		default:
+			_, _ = q.WriteString(" LIKE ?")
+			values = append(values, filter.queryGormValueLike())
+		}
 	case filterNotLikeThan:
-		_, _ = q.WriteString(" NOT LIKE ?")
-		values = append(values, filter.queryGormValueLike())
+		switch filter.Value.Type {
+		case TypeStringNil, TypeUint64Nil, TypeInt64Nil, TypeFloat64Nil, TypeBoolNil, TypeTimeNil:
+			if filter.Value.IsValueNil() {
+				// Фильтрация 'NOT LIKE ?', для значения NULL не имеет смысла.
+				break
+			}
+			fallthrough
+		default:
+			_, _ = q.WriteString(" NOT LIKE ?")
+			values = append(values, filter.queryGormValueLike())
+		}
 	//case filterIn:
 	//	_, _ = q.WriteString()
 	//case filterNotIn:

@@ -41,11 +41,12 @@ func TestFieldDatatype(t *testing.T) {
 	obj.
 		FieldDatatype("id", TypeUint64).
 		FieldDatatype("createAt", TypeTime).
+		FieldDatatype("deleteAt", TypeTimeNil).
 		FieldDatatype("order", TypeFloat64).
 		FieldDatatype("normal", TypeBool).
 		FieldDatatype("mId", TypeInt64)
-	if len(obj.Datatype) != 5 {
-		t.Errorf("Datatype map = %d, ожидалось %d.", len(obj.Datatype), 5)
+	if len(obj.Datatype) != 6 {
+		t.Errorf("Datatype map = %d, ожидалось %d.", len(obj.Datatype), 6)
 	}
 }
 

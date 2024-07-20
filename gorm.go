@@ -51,7 +51,9 @@ func (f8n *impl) gormFilter(orm *gorm.DB) (ret *gorm.DB) {
 
 	cond = orm
 	defer func() { ret = orm.Where(cond) }()
-	or = f8n.Map == nil && f8n.Tie == tieOr // Устаревший режим фильтрации применяется только если нет MAP.
+	// Устаревший режим фильтрации применяется только если нет MAP.
+	or = f8n.Map == nil && f8n.Tie == tieOr
+	// Добавление фильтров.
 	for n = range f8n.Filter {
 		t = f8n.fieldName(f8n.Filter[n].Field)
 		q, v = f8n.Filter[n].queryGorm()
