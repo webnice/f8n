@@ -85,7 +85,7 @@ var (
 // ERRORS: Реализация ошибок с возможностью сравнения ошибок между собой.
 
 // Panic Восстановление после паники. ... ...
-func (e *Error) Panic(err interface{}, stack []byte) Err {
+func (e *Error) Panic(err any, stack []byte) Err {
 	return newErr(&errPanic, 0, err, string(stack))
 }
 
@@ -113,7 +113,7 @@ func (e *Error) TieModeInvalidValue(s string, err error) Err {
 }
 
 // ValueCannotBeNegative Передано значение ..., значение не может быть отрицательным.
-func (e *Error) ValueCannotBeNegative(v interface{}) Err {
+func (e *Error) ValueCannotBeNegative(v any) Err {
 	return newErr(&errValueCannotBeNegative, 0, v)
 }
 

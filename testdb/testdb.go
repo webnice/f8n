@@ -51,7 +51,7 @@ func OpenTestConnection(cfg *gorm.Config) (db *gorm.DB, err error) {
 func Migrations() {
 	var err error
 
-	allModels := []interface{}{&Parent{}, &Child{}}
+	allModels := []any{&Parent{}, &Child{}}
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(allModels), func(i, j int) { allModels[i], allModels[j] = allModels[j], allModels[i] })
 	if err = DB.Migrator().DropTable("user_friends", "user_speaks"); err != nil {

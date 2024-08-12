@@ -44,7 +44,7 @@ func (f8n *impl) gormFilter(orm *gorm.DB) (ret *gorm.DB) {
 	var (
 		n    int
 		t, q string
-		v    []interface{}
+		v    []any
 		or   bool
 		cond *gorm.DB
 	)

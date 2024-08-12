@@ -29,7 +29,7 @@ func (fvo FilterValue) IsValueNil() (ret bool) {
 }
 
 // Value Возвращения значения в типе указанном у значения.
-func (fvo FilterValue) Value() (ret interface{}) {
+func (fvo FilterValue) Value() (ret any) {
 	var err error
 
 	switch fvo.Type {

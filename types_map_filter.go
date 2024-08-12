@@ -20,14 +20,14 @@ func (filter Filter) exportAsString() (ret string) {
 }
 
 // Выполнение замены символов в значении фильтрации для запросов SQL LIKE.
-func (filter Filter) queryGormValueLike() interface{} {
+func (filter Filter) queryGormValueLike() any {
 	var ret = strings.Replace(filter.Value.String(), "?", "_", -1)
 	ret = strings.Replace(ret, "*", "%", -1)
 	return ret
 }
 
 // Формирование SQL запроса и параметров для ORM GORM.
-func (filter Filter) queryGorm() (query string, values []interface{}) {
+func (filter Filter) queryGorm() (query string, values []any) {
 	var q strings.Builder
 
 	switch filter.Method {
