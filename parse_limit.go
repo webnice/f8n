@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/webnice/kit/v2/module/verify"
+	kitModuleAns "github.com/webnice/kit/v4/module/ans"
 )
 
 // ParseLimit Загрузка лимита.
@@ -19,7 +19,7 @@ func (f8n *impl) ParseLimit(rq *http.Request) (ret []*ParseError) {
 
 	if src = rq.URL.Query()[keyLimit]; len(src) > 1 {
 		ero = &ParseError{Ei: f8n.Errors().LimitReceivedMoreThanOne()}
-		ero.Ev = append(ero.Ev, verify.Error{
+		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyLimit,
 			FieldValue: strings.Join(src, ", "),
 			Message:    ero.Ei.Error(),
@@ -49,7 +49,7 @@ func (f8n *impl) ParseLimit(rq *http.Request) (ret []*ParseError) {
 		}
 		if i64o < 0 {
 			ero = &ParseError{Ei: f8n.Errors().ValueCannotBeNegative(i64o)}
-			ero.Ev = append(ero.Ev, verify.Error{
+			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyLimit,
 				FieldValue: tmp[0],
 				Message:    ero.Ei.Error(),

@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/webnice/kit/v2/module/verify"
+	kitModuleAns "github.com/webnice/kit/v4/module/ans"
 )
 
 // Origin Структура константы описывающей происхождение тега.
@@ -115,7 +115,7 @@ func (mp *Map) LoadAndParseFilter(rq *http.Request) (ret []*ParseError) {
 		keyFilter = strings.TrimSpace(mp.Content)
 		if filters, ok = rq.URL.Query()[keyFilter]; !ok {
 			ero = &ParseError{Ei: mp.parent.Errors().FilterCalledByNameWasNotFound(keyFilter)}
-			ero.Ev = append(ero.Ev, verify.Error{
+			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyMap,
 				FieldValue: keyFilter,
 				Message:    ero.Ei.Error(),

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/webnice/kit/v2/module/verify"
+	kitModuleAns "github.com/webnice/kit/v4/module/ans"
 )
 
 // ParseTie Загрузка устаревшего режима фильтрации - tie.
@@ -20,7 +20,7 @@ func (f8n *impl) ParseTie(rq *http.Request) (ret []*ParseError) {
 
 	if modes = rq.URL.Query()[keyTie]; len(modes) > 1 {
 		ero = &ParseError{Ei: f8n.Errors().TieModeThanOne()}
-		ero.Ev = append(ero.Ev, verify.Error{
+		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyLimit,
 			FieldValue: strings.Join(modes, ", "),
 			Message:    ero.Ei.Error(),
@@ -37,7 +37,7 @@ func (f8n *impl) ParseTie(rq *http.Request) (ret []*ParseError) {
 	default:
 		err = fmt.Errorf("допустимые значения: %q или %q", tieAnd, tieOr)
 		ero = &ParseError{Ei: Errors().TieModeInvalidValue(modes[0], err)}
-		ero.Ev = append(ero.Ev, verify.Error{
+		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyTie,
 			FieldValue: modes[0],
 			Message:    ero.Ei.Error(),

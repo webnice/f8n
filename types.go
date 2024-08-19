@@ -3,7 +3,7 @@ package f8n
 import (
 	"regexp"
 
-	"github.com/webnice/kit/v2/module/verify"
+	kitModuleAns "github.com/webnice/kit/v4/module/ans"
 )
 
 var (
@@ -32,7 +32,7 @@ type impl struct {
 // ParseError Ошибки возникшие в результате разбора входящих параметров.
 type ParseError struct {
 	Ei error
-	Ev []verify.Error
+	Ev []kitModuleAns.RestErrorField
 }
 
 // OnErrorFunc Функция, вызываемая при возникновении ошибки при разборе запроса.

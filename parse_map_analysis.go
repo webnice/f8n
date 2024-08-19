@@ -3,7 +3,7 @@ package f8n
 import (
 	"strings"
 
-	"github.com/webnice/kit/v2/module/verify"
+	kitModuleAns "github.com/webnice/kit/v4/module/ans"
 )
 
 // Анализатор, выделение сущности, проверка.
@@ -16,7 +16,7 @@ func (f8n *impl) analysis(node *Map) (ret []*ParseError) {
 	// Функция сборки ошибки.
 	fxp = func(r []*ParseError, e Err) []*ParseError {
 		var eo = &ParseError{Ei: e}
-		eo.Ev = append(eo.Ev, verify.Error{
+		eo.Ev = append(eo.Ev, kitModuleAns.RestErrorField{
 			Field:   keyFilter,
 			Message: eo.Ei.Error(),
 		})

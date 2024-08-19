@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/webnice/kit/v2/module/verify"
+	kitModuleAns "github.com/webnice/kit/v4/module/ans"
 )
 
 // ParseBy Загрузка сортировки.
@@ -25,7 +25,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 		// Проверка формата.
 		if tmp = strings.SplitN(src[n], keyDelimiter, nSection); len(tmp) != nSection {
 			ero = &ParseError{Ei: f8n.Errors().ByFormat()}
-			ero.Ev = append(ero.Ev, verify.Error{
+			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyBy,
 				FieldValue: src[n],
 				Message:    ero.Ei.Error(),
@@ -36,7 +36,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 		// Проверка ключевого слова сортировки.
 		if dir = parseByDirection(tmp[1]); dir == byUnknown {
 			ero = &ParseError{Ei: f8n.Errors().ByDirectionUnknown(tmp[1])}
-			ero.Ev = append(ero.Ev, verify.Error{
+			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyBy,
 				FieldValue: src[n],
 				Message:    ero.Ei.Error(),
@@ -57,7 +57,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 			}
 			if !found {
 				ero = &ParseError{Ei: f8n.Errors().ByDirectionField(f8n.By[n].Field)}
-				ero.Ev = append(ero.Ev, verify.Error{
+				ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 					Field:      keyBy,
 					FieldValue: src[n],
 					Message:    ero.Ei.Error(),

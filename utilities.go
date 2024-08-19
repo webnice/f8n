@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/webnice/kit/v2/module/verify"
+	kitModuleAns "github.com/webnice/kit/v4/module/ans"
 )
 
 // CleanNameField Очистка названия полей от возможных не корректных символов.
@@ -45,7 +45,7 @@ func parseInt64(field string, s string) (ret int64, ero *ParseError) {
 	}
 	if ret, err = strconv.ParseInt(s, 10, 64); err != nil {
 		ero = &ParseError{Ei: Errors().LimitInvalidValue(s, err)}
-		ero.Ev = append(ero.Ev, verify.Error{
+		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      field,
 			FieldValue: s,
 			Message:    ero.Ei.Error(),

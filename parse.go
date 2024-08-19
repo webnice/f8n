@@ -1,10 +1,12 @@
 package f8n
 
 import (
+	"bytes"
 	"net/http"
 	runtimeDebug "runtime/debug"
 
-	"github.com/webnice/kit/v2/module/verify"
+	"github.com/webnice/dic"
+	kitModuleAns "github.com/webnice/kit/v4/module/ans"
 )
 
 // ParseRequest Загрузка настроек фильтрации из запроса http.Request.
@@ -13,10 +15,10 @@ import (
 // будут переданы описания возникшей ошибки.
 func (f8n *impl) ParseRequest(rq *http.Request, errorFn ...OnErrorFunc) (err error) {
 	var (
-		vyi  verify.Interface
+		rei  kitModuleAns.RestErrorInterface
 		ers  []*ParseError
 		tmp  []*ParseError
-		buf  []byte
+		buf  *bytes.Buffer
 		n, j int
 	)
 
@@ -61,15 +63,17 @@ func (f8n *impl) ParseRequest(rq *http.Request, errorFn ...OnErrorFunc) (err err
 	if err = ers[0].Ei; len(ers) > 1 {
 		err = f8n.Errors().MultipleErrorsFound()
 	}
-	vyi = verify.E4xx().Code(-1).Message(err.Error())
+	rei = kitModuleAns.New(nil).
+		NewRestError(dic.Status().BadRequest, err).
+		CodeSet(-1)
 	for n = range ers {
 		for j = range ers[n].Ev {
-			vyi.Add(ers[n].Ev[j])
+			rei.AddWithKey(ers[n].Ev[j].Field, ers[n].Ev[j].FieldValue, ers[n].Ev[j].Message, ers[n].Ev[j].I18nKey)
 		}
 	}
-	buf = vyi.Json()
+	buf, _ = rei.JsonBytes()
 	for n = range errorFn {
-		errorFn[n](buf, err)
+		errorFn[n](buf.Bytes(), err)
 	}
 
 	return
