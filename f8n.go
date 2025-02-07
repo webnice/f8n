@@ -12,3 +12,10 @@ func New() Interface {
 
 // Errors Справочник ошибок.
 func (f8n *impl) Errors() *Error { return Errors() }
+
+// IsFiltration Информация о наличии фильтрации в запросе.
+// Истина - Есть хотя бы один фильтр.
+// Ложь - фильтры отсутствуют.
+func (f8n *impl) IsFiltration() bool {
+	return len(f8n.Filter) > 0
+}
