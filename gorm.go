@@ -4,6 +4,21 @@ import "gorm.io/gorm"
 
 // Gorm Добавление в ORM всех разобранных значений.
 func (f8n *impl) Gorm(orm *gorm.DB) (ret *gorm.DB, err error) {
+	var filter *gorm.DB
+
+	if ret, filter, err = f8n.GormSepFilter(orm); err != nil {
+		return
+	}
+	// Объединение с фильтрами.
+	if len(f8n.Filter) > 0 {
+		ret = orm.Where(filter)
+	}
+
+	return
+}
+
+// GormSepFilter Добавление в ORM всех разобранных значений и возвращение фильтрации отдельным объектом.
+func (f8n *impl) GormSepFilter(orm *gorm.DB) (ret *gorm.DB, filter *gorm.DB, err error) {
 	var n int
 
 	if orm == nil {
@@ -11,9 +26,9 @@ func (f8n *impl) Gorm(orm *gorm.DB) (ret *gorm.DB, err error) {
 		return
 	}
 	defer func() { ret = orm }()
-	// Добавление фильтров простой фильтрации.
-	orm = f8n.gormFilter(orm)
-	// Добавление фильтров сложной фильтрации.
+	// Создание фильтров простой фильтрации.
+	filter = f8n.gormFilter(orm)
+	// Создание фильтров сложной фильтрации.
 
 	// TODO: Добавить фильтры сложной фильтрации.
 
@@ -40,17 +55,17 @@ func (f8n *impl) Gorm(orm *gorm.DB) (ret *gorm.DB, err error) {
 }
 
 // Добавление фильтров простой фильтрации.
-func (f8n *impl) gormFilter(orm *gorm.DB) (ret *gorm.DB) {
+func (f8n *impl) gormFilter(orm *gorm.DB) (filter *gorm.DB) {
+	const keyInstance = "original-orm-object"
 	var (
 		n    int
 		t, q string
 		v    []any
 		or   bool
-		cond *gorm.DB
 	)
 
-	cond = orm
-	defer func() { ret = orm.Where(cond) }()
+	// Создание чистой сессии для отделения всех фильтров от основного запроса.
+	filter = orm.Session(&gorm.Session{NewDB: true})
 	// Устаревший режим фильтрации применяется только если нет MAP.
 	or = f8n.Map == nil && f8n.Tie == tieOr
 	// Добавление фильтров.
@@ -59,9 +74,9 @@ func (f8n *impl) gormFilter(orm *gorm.DB) (ret *gorm.DB) {
 		q, v = f8n.Filter[n].queryGorm()
 		switch {
 		case or && n > 0:
-			cond = cond.Or(t+q, v...)
+			filter = filter.Or(t+q, v...)
 		default:
-			cond = cond.Where(t+q, v...)
+			filter = filter.Where(t+q, v...)
 		}
 	}
 

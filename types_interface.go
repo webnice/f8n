@@ -98,6 +98,9 @@ type Interface interface {
 	// Gorm Добавление в ORM всех разобранных значений.
 	Gorm(orm *gorm.DB) (ret *gorm.DB, err error)
 
+	// GormSepFilter Добавление в ORM всех разобранных значений и возвращение фильтрации отдельным объектом.
+	GormSepFilter(orm *gorm.DB) (ret *gorm.DB, filter *gorm.DB, err error)
+
 	// Sql Создание SQL запроса с фильтрацией данных.
 	// В функцию передаётся диалект базы данных, для правильного формирования SQL запроса с ориентировкой на
 	// тип используемой базы банных.
