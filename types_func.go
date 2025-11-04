@@ -45,11 +45,70 @@ func (fvo FilterValue) Value() (ret any) {
 		ret, err = strconv.ParseBool(fvo.Source)
 	case TypeTime:
 		ret, err = time.Parse(time.RFC3339, fvo.Source)
+	case TypeSliceString:
+		ret, err = fvo.SliceString()
+	case TypeSliceInt64:
+		ret, err = fvo.SliceInt64()
+	case TypeSliceUint64:
+		ret, err = fvo.SliceUint64()
 	default:
 		ret = fvo.Source
 	}
 	if err != nil {
 		ret = nil
+	}
+
+	return
+}
+
+// SliceString Представление значения в виде среза строк.
+func (fvo FilterValue) SliceString() (ret []string, err error) {
+	const sep = ","
+	var n int
+
+	ret = strings.Split(fvo.Source, sep)
+	for n = range ret {
+		ret[n] = strings.TrimSpace(ret[n])
+	}
+
+	return
+}
+
+// SliceInt64 Представления значения в виде среза int64.
+func (fvo FilterValue) SliceInt64() (ret []int64, err error) {
+	var (
+		n   int
+		str []string
+		tmp int64
+	)
+
+	str = strings.Split(fvo.Source, sepInNi)
+	ret = make([]int64, 0, len(str))
+	for n = range str {
+		if tmp, err = strconv.ParseInt(str[n], 10, 64); err != nil {
+			return
+		}
+		ret = append(ret, tmp)
+	}
+
+	return
+}
+
+// SliceUint64 Представления значения в виде среза uint64.
+func (fvo FilterValue) SliceUint64() (ret []uint64, err error) {
+	var (
+		n   int
+		str []string
+		tmp uint64
+	)
+
+	str = strings.Split(fvo.Source, sepInNi)
+	ret = make([]uint64, 0, len(str))
+	for n = range str {
+		if tmp, err = strconv.ParseUint(str[n], 10, 64); err != nil {
+			return
+		}
+		ret = append(ret, tmp)
 	}
 
 	return
@@ -68,6 +127,12 @@ func (fvo FilterValue) Test() (err error) {
 		_, err = strconv.ParseBool(fvo.Source)
 	case TypeTime:
 		_, err = time.Parse(time.RFC3339, fvo.Source)
+	case TypeSliceString:
+		_, err = fvo.SliceString()
+	case TypeSliceInt64:
+		_, err = fvo.SliceInt64()
+	case TypeSliceUint64:
+		_, err = fvo.SliceUint64()
 	}
 
 	return

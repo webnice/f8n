@@ -12,6 +12,7 @@ const (
 	keyNilValue  = "nil"    // Значение определяющие nil.
 	pairBeg      = "("      // Начало операторных скобок.
 	pairEnd      = ")"      // Окончание операторных скобок.
+	sepInNi      = ","      // Разделитель значений для "IN" и "NI".
 )
 
 const (
@@ -108,11 +109,14 @@ const (
 	// TypeTimeNil Тип поля time, который в базе данных может быть NULL.
 	TypeTimeNil = FieldType("time-or-nil")
 
-	// TypeArrayInt64 Тип поля int64 для SQL IN.
-	//TypeArrayInt64 = FieldType("array_int64")
+	// TypeSliceString Тип поля среза строк для SQL IN.
+	TypeSliceString = FieldType("slice_of_strings")
 
-	// TypeArrayUint64 Тип поля uint64 для SQL IN.
-	//TypeArrayUint64 = FieldType("array_uint64")
+	// TypeSliceInt64 Тип поля среза int64 для SQL IN.
+	TypeSliceInt64 = FieldType("slice_of_int64")
+
+	// TypeSliceUint64 Тип поля среза uint64 для SQL IN.
+	TypeSliceUint64 = FieldType("slice_of_uint64")
 )
 
 const (

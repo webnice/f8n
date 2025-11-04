@@ -24,7 +24,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 	for n = range src {
 		// Проверка формата.
 		if tmp = strings.SplitN(src[n], keyDelimiter, nSection); len(tmp) != nSection {
-			ero = &ParseError{Ei: f8n.Errors().ByFormat()}
+			ero = &ParseError{Ei: f8n.Errors().ByFormat.Bind()}
 			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyBy,
 				FieldValue: src[n],
@@ -35,7 +35,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 		}
 		// Проверка ключевого слова сортировки.
 		if dir = parseByDirection(tmp[1]); dir == byUnknown {
-			ero = &ParseError{Ei: f8n.Errors().ByDirectionUnknown(tmp[1])}
+			ero = &ParseError{Ei: f8n.Errors().ByDirectionUnknown.Bind(tmp[1])}
 			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyBy,
 				FieldValue: src[n],
@@ -56,7 +56,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 				}
 			}
 			if !found {
-				ero = &ParseError{Ei: f8n.Errors().ByDirectionField(f8n.By[n].Field)}
+				ero = &ParseError{Ei: f8n.Errors().ByDirectionField.Bind(f8n.By[n].Field)}
 				ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 					Field:      keyBy,
 					FieldValue: src[n],

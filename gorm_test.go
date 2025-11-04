@@ -2,7 +2,6 @@ package f8n
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -60,8 +59,6 @@ func TestGormNil(t *testing.T) {
 		err error
 		f8n Interface
 		orm *gorm.DB
-		ero Err
-		ok  bool
 	)
 
 	f8n = New()
@@ -71,12 +68,8 @@ func TestGormNil(t *testing.T) {
 	if orm != nil {
 		t.Errorf("Gorm(). Ожидался объект равный nil.")
 	}
-	if ero, ok = err.(Err); !ok {
-		t.Errorf("Gorm() = %q, не верный тип ошибки.", err)
-		return
-	}
-	if !errors.Is(ero.Anchor(), f8n.Errors().OrmIsNil().Anchor()) {
-		t.Errorf("Gorm(). Ошибка: %q, ожидалась: %q", ero.Error(), f8n.Errors().OrmIsNil().Error())
+	if !f8n.Errors().OrmIsNil.Is(err) {
+		t.Errorf("Gorm(). Ошибка: %q, ожидалась: %q", err, f8n.Errors().OrmIsNil.Bind())
 		return
 	}
 }

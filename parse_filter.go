@@ -44,7 +44,7 @@ func (f8n *impl) parseFilterSimple(s string) (ret Filter, err []*ParseError) {
 
 	// Проверка формата.
 	if tmp = strings.SplitN(s, keyDelimiter, nSection); len(tmp) != nSection {
-		ero = &ParseError{Ei: f8n.Errors().FilterFormat()}
+		ero = &ParseError{Ei: f8n.Errors().FilterFormat.Bind()}
 		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyFilter,
 			FieldValue: s,
@@ -55,7 +55,7 @@ func (f8n *impl) parseFilterSimple(s string) (ret Filter, err []*ParseError) {
 	}
 	// Проверка константы метода фильтрации.
 	if ret.Method = parseFilterMethod(tmp[1]); ret.Method == filterUnknown {
-		ero = &ParseError{Ei: f8n.Errors().FilterUnknownMethod(tmp[1])}
+		ero = &ParseError{Ei: f8n.Errors().FilterUnknownMethod.Bind(tmp[1])}
 		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyFilter,
 			FieldValue: tmp[1],
@@ -72,7 +72,7 @@ func (f8n *impl) parseFilterSimple(s string) (ret Filter, err []*ParseError) {
 			}
 		}
 		if !found {
-			ero = &ParseError{Ei: f8n.Errors().FilterUnknownField(ret.Field)}
+			ero = &ParseError{Ei: f8n.Errors().FilterUnknownField.Bind(ret.Field)}
 			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyFilter,
 				FieldValue: ret.Field,
@@ -89,7 +89,7 @@ func (f8n *impl) parseFilterSimple(s string) (ret Filter, err []*ParseError) {
 	}
 	// Тестирование значения.
 	if e = ret.Value.Test(); e != nil {
-		ero = &ParseError{Ei: f8n.Errors().FilterValueType(ret.Value.Source, ret.Value.Type, e)}
+		ero = &ParseError{Ei: f8n.Errors().FilterValueType.Bind(ret.Value.Source, ret.Value.Type, e)}
 		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyFilter,
 			FieldValue: s,

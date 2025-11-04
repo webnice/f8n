@@ -130,9 +130,7 @@ func TestParseMapWithError(t *testing.T) {
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	if rq, err = http.NewRequest("GET", strings.ReplaceAll(data, "\n", ""), nil); err != nil {
@@ -144,15 +142,8 @@ func TestParseMapWithError(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseMap() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().PairedTagNotMatch("", "").Anchor() {
-			t.Errorf("ParseMap() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().PairedTagNotMatch("", "").Error(),
-			)
+		if !Errors().PairedTagNotMatch.Is(ers[n].Ei) {
+			t.Errorf("ParseMap() = %q, ожидалось: %q", ers[n].Ei, Errors().PairedTagNotMatch.Bind())
 			return
 		}
 	}
@@ -164,15 +155,8 @@ func TestParseMapWithError(t *testing.T) {
 		t.Errorf("ParseRequest() == nil, ожидалась ошибка.")
 		return
 	}
-	if ero, ok = err.(Err); !ok {
-		t.Errorf("ParseRequest() = %q, не верный тип ошибки.", err)
-		return
-	}
-	if ero.Anchor() != Errors().Panic(nil, []byte{}).Anchor() {
-		t.Errorf("ParseRequest() = %q, ожидалось: %q",
-			ero.Error(),
-			Errors().Panic(nil, []byte{}).Error(),
-		)
+	if !Errors().Panic.Is(err) {
+		t.Errorf("ParseRequest() = %q, ожидалось: %q", err, Errors().Panic.Bind())
 		return
 	}
 }

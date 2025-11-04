@@ -44,7 +44,7 @@ func parseInt64(field string, s string) (ret int64, ero *ParseError) {
 		return
 	}
 	if ret, err = strconv.ParseInt(s, 10, 64); err != nil {
-		ero = &ParseError{Ei: Errors().LimitInvalidValue(s, err)}
+		ero = &ParseError{Ei: Errors().LimitInvalidValue.Bind(s, err)}
 		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      field,
 			FieldValue: s,

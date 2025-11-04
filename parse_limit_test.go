@@ -1,7 +1,6 @@
 package f8n
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"testing"
@@ -14,9 +13,7 @@ func TestParseLimitReceivedMoreThanOne(t *testing.T) {
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	if rq, err = http.NewRequest("GET", "http://localhost?limit=1&limit=2", nil); err != nil {
@@ -28,13 +25,9 @@ func TestParseLimitReceivedMoreThanOne(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseLimit() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().LimitReceivedMoreThanOne().Anchor() ||
-			Errors().LimitReceivedMoreThanOne().Code() != 4 {
-			t.Errorf("ParseLimit() = %q, ожидалось: %q", ero.Error(), Errors().LimitReceivedMoreThanOne().Error())
+		if !Errors().LimitReceivedMoreThanOne.Is(ers[n].Ei) ||
+			Errors().LimitReceivedMoreThanOne.CodeI().Get() != 4 {
+			t.Errorf("ParseLimit() = %q, ожидалось: %q", ers[n].Ei, Errors().LimitReceivedMoreThanOne.Bind())
 			return
 		}
 	}
@@ -47,9 +40,7 @@ func TestParseLimitInvalidValue(t *testing.T) {
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	if rq, err = http.NewRequest("GET", "http://localhost?limit=1abc2", nil); err != nil {
@@ -61,19 +52,8 @@ func TestParseLimitInvalidValue(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseLimit() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().
-			LimitInvalidValue("1abc2", errors.New(`strconv.ParseInt: parsing "1abc2": invalid syntax`)).
-			Anchor() {
-			t.Errorf("ParseLimit() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().
-					LimitInvalidValue("1abc2", errors.New(`strconv.ParseInt: parsing "1abc2": invalid syntax`)).
-					Error(),
-			)
+		if !Errors().LimitInvalidValue.Is(ers[n].Ei) {
+			t.Errorf("ParseLimit() = %q, ожидалось: %q", ers[n].Ei, Errors().LimitInvalidValue.Bind())
 			return
 		}
 	}
@@ -130,6 +110,8 @@ func TestParseLimitOneValue(t *testing.T) {
 }
 
 // Тестирование лимита переданного с двумя значениями.
+//
+//goland:noinspection DuplicatedCode
 func TestParseLimit(t *testing.T) {
 	const (
 		offsetP, limitP   = 1012, 53
@@ -140,9 +122,7 @@ func TestParseLimit(t *testing.T) {
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	if rq, err = http.NewRequest("GET",
@@ -170,15 +150,8 @@ func TestParseLimit(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseLimit() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().ValueCannotBeNegative(offsetN1).Anchor() {
-			t.Errorf("ParseLimit() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().ValueCannotBeNegative(offsetN1).Error(),
-			)
+		if !Errors().ValueCannotBeNegative.Is(ers[n].Ei) {
+			t.Errorf("ParseLimit() = %q, ожидалось: %q", ers[n].Ei, Errors().ValueCannotBeNegative.Bind())
 			return
 		}
 	}

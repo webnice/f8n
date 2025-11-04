@@ -17,9 +17,7 @@ func TestMapLoadAndParseFilterCalledByNameWasNotFound(t *testing.T) {
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	if rq, err = http.NewRequest("GET", strings.ReplaceAll(data, "\n", ""), nil); err != nil {
@@ -31,15 +29,8 @@ func TestMapLoadAndParseFilterCalledByNameWasNotFound(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseMap() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().FilterCalledByNameWasNotFound("").Anchor() {
-			t.Errorf("ParseMap() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().FilterCalledByNameWasNotFound("").Error(),
-			)
+		if !Errors().FilterCalledByNameWasNotFound.Is(ers[n].Ei) {
+			t.Errorf("ParseMap() = %q, ожидалось: %q", ers[n].Ei, Errors().FilterCalledByNameWasNotFound.Bind())
 			return
 		}
 	}

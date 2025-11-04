@@ -32,15 +32,15 @@ func TestParseFilterEmpty(t *testing.T) {
 }
 
 // Тестирование простой фильтрации - ошибка формата.
+//
+//goland:noinspection ALL
 func TestParseFilterFormat(t *testing.T) {
 	var (
 		err error
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	// Не верный формат значения сортировки.
@@ -53,30 +53,23 @@ func TestParseFilterFormat(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseFilter() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().FilterFormat().Anchor() {
-			t.Errorf("ParseFilter() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().FilterFormat().Error(),
-			)
+		if !Errors().FilterFormat.Is(ers[n].Ei) {
+			t.Errorf("ParseFilter() = %q, ожидалось: %q", ers[n].Ei, Errors().FilterFormat.Bind())
 			return
 		}
 	}
 }
 
 // Тестирование простой фильтрации - неизвестный метод.
+//
+//goland:noinspection ALL
 func TestParseFilterUnknownMethod(t *testing.T) {
 	var (
 		err error
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	// Не верный формат значения сортировки.
@@ -89,15 +82,8 @@ func TestParseFilterUnknownMethod(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseFilter() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().FilterUnknownMethod("").Anchor() {
-			t.Errorf("ParseFilter() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().FilterUnknownMethod("").Error(),
-			)
+		if !Errors().FilterUnknownMethod.Is(ers[n].Ei) {
+			t.Errorf("ParseFilter() = %q, ожидалось: %q", ers[n].Ei, Errors().FilterUnknownMethod.Bind())
 			return
 		}
 	}
@@ -110,9 +96,7 @@ func TestParseFilterField(t *testing.T) {
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	// Не строгие поля.
@@ -140,15 +124,8 @@ func TestParseFilterField(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseFilter() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().FilterUnknownField("aaa").Anchor() {
-			t.Errorf("ParseFilter() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().FilterUnknownField("aaa").Error(),
-			)
+		if !Errors().FilterUnknownField.Is(ers[n].Ei) {
+			t.Errorf("ParseFilter() = %q, ожидалось: %q", ers[n].Ei, Errors().FilterUnknownField.Bind())
 			return
 		}
 	}

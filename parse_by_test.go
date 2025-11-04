@@ -7,15 +7,15 @@ import (
 )
 
 // Тестирование сортировки.
+//
+//goland:noinspection DuplicatedCode
 func TestParseBy(t *testing.T) {
 	var (
 		err error
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	// Пустой массив сортировки.
@@ -53,15 +53,8 @@ func TestParseBy(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseBy() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().ByFormat().Anchor() {
-			t.Errorf("ParseBy() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().ByFormat().Error(),
-			)
+		if !Errors().ByFormat.Is(ers[n].Ei) {
+			t.Errorf("ParseBy() = %q, ожидалось: %q", ers[n].Ei, Errors().ByFormat.Bind())
 			return
 		}
 	}
@@ -75,30 +68,23 @@ func TestParseBy(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseBy() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().ByDirectionUnknown("").Anchor() {
-			t.Errorf("ParseBy() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().ByDirectionUnknown("").Error(),
-			)
+		if !Errors().ByDirectionUnknown.Is(ers[n].Ei) {
+			t.Errorf("ParseBy() = %q, ожидалось: %q", ers[n].Ei, Errors().ByDirectionUnknown.Bind())
 			return
 		}
 	}
 }
 
 // Тестирование сортировки. Строгие и не строгие поля.
+//
+//goland:noinspection ALL
 func TestParseByField(t *testing.T) {
 	var (
 		err error
 		rq  *http.Request
 		obj *impl
 		ers []*ParseError
-		ero Err
 		n   int
-		ok  bool
 	)
 
 	// Не строгие поля.
@@ -121,15 +107,8 @@ func TestParseByField(t *testing.T) {
 		return
 	}
 	for n = range ers {
-		if ero, ok = ers[n].Ei.(Err); !ok {
-			t.Errorf("ParseBy() = %q, не верный тип ошибки.", ers[n])
-			return
-		}
-		if ero.Anchor() != Errors().ByDirectionField("aaa").Anchor() {
-			t.Errorf("ParseBy() = %q, ожидалось: %q",
-				ero.Error(),
-				Errors().ByDirectionField("aaa").Error(),
-			)
+		if !Errors().ByDirectionField.Is(ers[n].Ei) {
+			t.Errorf("ParseBy() = %q, ожидалось: %q", ers[n].Ei, Errors().ByDirectionField.Bind())
 			return
 		}
 	}

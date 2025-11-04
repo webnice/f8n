@@ -1,170 +1,156 @@
 package f8n
 
-// Все ошибки определены как константы. Коды ошибок приложения:
+import "github.com/webnice/dic"
 
-// Обычные ошибки
+// Коды ошибок.
 const (
-	ePanic uint8 = iota + 1
-	eRequestIsNil
-	eMultipleErrorsFound
-	eLimitReceivedMoreThanOne
-	eLimitInvalidValue
-	eTieModeThanOne
-	eTieModeInvalidValue
-	eValueCannotBeNegative
-	eByFormat
-	eByDirectionUnknown
-	eByDirectionField
-	eFilterFormat
-	eFilterUnknownMethod
-	eFilterUnknownField
-	eFilterValueType
-	ePairedTagNotMatch
-	eWrongLogicalOperation
-	eOperatorBracketEmpty
-	eOperatorBracketOneItem
-	eNoLogicalOperationBetweenBrackets
-	eFilterCalledByNameWasNotFound
-	eOrmIsNil
+	ePanic                             uint8 = iota + 1 // 001
+	eRequestIsNil                                       // 002
+	eMultipleErrorsFound                                // 003
+	eLimitReceivedMoreThanOne                           // 004
+	eLimitInvalidValue                                  // 005
+	eTieModeThanOne                                     // 006
+	eTieModeInvalidValue                                // 007
+	eValueCannotBeNegative                              // 008
+	eByFormat                                           // 009
+	eByDirectionUnknown                                 // 010
+	eByDirectionField                                   // 011
+	eFilterFormat                                       // 012
+	eFilterUnknownMethod                                // 013
+	eFilterUnknownField                                 // 014
+	eFilterValueType                                    // 015
+	ePairedTagNotMatch                                  // 016
+	eWrongLogicalOperation                              // 017
+	eOperatorBracketEmpty                               // 018
+	eOperatorBracketOneItem                             // 019
+	eNoLogicalOperationBetweenBrackets                  // 020
+	eFilterCalledByNameWasNotFound                      // 021
+	eOrmIsNil                                           // 022
 )
 
-// Текстовые значения кодов ошибок на основном языке приложения.
+// Константы ошибок.
 const (
 	cPanic                             = "Восстановление после паники.\n%v\n%s"
-	cRequestIsNil                      = `Передан http.Request равный nil.`
-	cMultipleErrorsFound               = `Найдены множественные ошибки.`
-	cLimitReceivedMoreThanOne          = `Получено больше одного значения лимита. Поддерживается только одно значение лимита.`
-	cLimitInvalidValue                 = `Получено недопустимое значение лимита %q, ошибка: %s.`
-	cTieModeThanOne                    = `Получено больше одного значения режима фильтрации. Поддерживается только одно значение режима фильтрации.`
-	cTieModeInvalidValue               = `Получено недопустимое значение режима фильтрации %q, ошибка: %s.`
-	cValueCannotBeNegative             = `Передано значение %d, значение не может быть отрицательным.`
-	cByFormat                          = `Формат значения сортировки не верный.`
-	cByDirectionUnknown                = `Неизвестный порядок сортировки %q, ожидался asc или desc.`
-	cByDirectionField                  = `Указана сортировка по не известному полю %q.`
-	cFilterFormat                      = `Формат значения фильтрации не верный.`
-	cFilterUnknownMethod               = `Неизвестный способ фильтрации %q.`
-	cFilterUnknownField                = `Указана фильтрация по не известному полю %q.`
-	cFilterValueType                   = `Указано значение %q не соответствующее типу %q, ошибка: %s.`
-	cPairedTagNotMatch                 = `Открывающий тег %q не соответствует закрывающему тегу %q.`
-	cWrongLogicalOperation             = `Не верная логическая операция %q`
-	cOperatorBracketEmpty              = `Указаны пустые операторные скобки.`
-	cOperatorBracketOneItem            = `В операторные скобки заключён один элемент, уберите операторные скобки.`
-	cNoLogicalOperationBetweenBrackets = `Необходимо указать логическую операцию между операторных скобок.`
-	cFilterCalledByNameWasNotFound     = `Значение фильтра с названием %q не было найдено в запросе.`
-	cOrmIsNil                          = `Передан ORM объект являющейся nil. Ожидался не nil объект.`
+	cRequestIsNil                      = "Передан http.Request равный nil."
+	cMultipleErrorsFound               = "Найдены множественные ошибки."
+	cLimitReceivedMoreThanOne          = "Получено больше одного значения лимита. Поддерживается только одно значение лимита."
+	cLimitInvalidValue                 = "Получено недопустимое значение лимита %q, ошибка: %s."
+	cTieModeThanOne                    = "Получено больше одного значения режима фильтрации. Поддерживается только одно значение режима фильтрации."
+	cTieModeInvalidValue               = "Получено недопустимое значение режима фильтрации %q, ошибка: %s."
+	cValueCannotBeNegative             = "Передано значение %d, значение не может быть отрицательным."
+	cByFormat                          = "Формат значения сортировки не верный."
+	cByDirectionUnknown                = "Неизвестный порядок сортировки %q, ожидался asc или desc."
+	cByDirectionField                  = "Указана сортировка по не известному полю %q."
+	cFilterFormat                      = "Формат значения фильтрации не верный."
+	cFilterUnknownMethod               = "Неизвестный способ фильтрации %q."
+	cFilterUnknownField                = "Указана фильтрация по не известному полю %q."
+	cFilterValueType                   = "Указано значение %q не соответствующее типу %q, ошибка: %s."
+	cPairedTagNotMatch                 = "Открывающий тег %q не соответствует закрывающему тегу %q."
+	cWrongLogicalOperation             = "Не верная логическая операция %q"
+	cOperatorBracketEmpty              = "Указаны пустые операторные скобки."
+	cOperatorBracketOneItem            = "В операторные скобки заключён один элемент, уберите операторные скобки."
+	cNoLogicalOperationBetweenBrackets = "Необходимо указать логическую операцию между операторных скобок."
+	cFilterCalledByNameWasNotFound     = "Значение фильтра с названием %q не было найдено в запросе."
+	cOrmIsNil                          = "Передан ORM объект являющейся nil. Ожидался не nil объект."
 )
 
-// Константы указаны в объектах, адрес которых фиксирован всё время работы приложения.
-// Это позволяет сравнивать ошибки между собой используя обычное сравнение "==", но сравнивать необходимо только якорь "Anchor()" объекта ошибки.
-var (
-	errSingleton                         = &Error{}
-	errPanic                             = err{tpl: cPanic, code: ePanic}
-	errRequestIsNil                      = err{tpl: cRequestIsNil, code: eRequestIsNil}
-	errMultipleErrorsFound               = err{tpl: cMultipleErrorsFound, code: eMultipleErrorsFound}
-	errLimitReceivedMoreThanOne          = err{tpl: cLimitReceivedMoreThanOne, code: eLimitReceivedMoreThanOne}
-	errLimitInvalidValue                 = err{tpl: cLimitInvalidValue, code: eLimitInvalidValue}
-	errTieModeThanOne                    = err{tpl: cTieModeThanOne, code: eTieModeThanOne}
-	errTieModeInvalidValue               = err{tpl: cTieModeInvalidValue, code: eTieModeInvalidValue}
-	errValueCannotBeNegative             = err{tpl: cValueCannotBeNegative, code: eValueCannotBeNegative}
-	errByFormat                          = err{tpl: cByFormat, code: eByFormat}
-	errByDirectionUnknown                = err{tpl: cByDirectionUnknown, code: eByDirectionUnknown}
-	errByDirectionField                  = err{tpl: cByDirectionField, code: eByDirectionField}
-	errFilterFormat                      = err{tpl: cFilterFormat, code: eFilterFormat}
-	errFilterUnknownMethod               = err{tpl: cFilterUnknownMethod, code: eFilterUnknownMethod}
-	errFilterUnknownField                = err{tpl: cFilterUnknownField, code: eFilterUnknownField}
-	errFilterValueType                   = err{tpl: cFilterValueType, code: eFilterValueType}
-	errPairedTagNotMatch                 = err{tpl: cPairedTagNotMatch, code: ePairedTagNotMatch}
-	errWrongLogicalOperation             = err{tpl: cWrongLogicalOperation, code: eWrongLogicalOperation}
-	errOperatorBracketEmpty              = err{tpl: cOperatorBracketEmpty, code: eOperatorBracketEmpty}
-	errOperatorBracketOneItem            = err{tpl: cOperatorBracketOneItem, code: eOperatorBracketOneItem}
-	errNoLogicalOperationBetweenBrackets = err{tpl: cNoLogicalOperationBetweenBrackets, code: eNoLogicalOperationBetweenBrackets}
-	errFilterCalledByNameWasNotFound     = err{tpl: cFilterCalledByNameWasNotFound, code: eFilterCalledByNameWasNotFound}
-	errOrmIsNil                          = err{tpl: cOrmIsNil, code: eOrmIsNil}
-)
+// Error Структура справочника ошибок.
+type Error struct {
+	dic.Errors
 
-// ERRORS: Реализация ошибок с возможностью сравнения ошибок между собой.
+	// Panic Восстановление после паники. ...
+	Panic dic.IError
 
-// Panic Восстановление после паники. ... ...
-func (e *Error) Panic(err any, stack []byte) Err {
-	return newErr(&errPanic, 0, err, string(stack))
+	// RequestIsNil Передан http.Request равный nil.
+	RequestIsNil dic.IError
+
+	// MultipleErrorsFound Найдены множественные ошибки.
+	MultipleErrorsFound dic.IError
+
+	// LimitReceivedMoreThanOne Получено больше одного значения лимита. Поддерживается только одно значение лимита.
+	LimitReceivedMoreThanOne dic.IError
+
+	// LimitInvalidValue Получено недопустимое значение лимита ..., ошибка: ...
+	LimitInvalidValue dic.IError
+
+	// TieModeThanOne Получено больше одного значения режима фильтрации.
+	// Поддерживается только одно значение режима фильтрации.
+	TieModeThanOne dic.IError
+
+	// TieModeInvalidValue Получено недопустимое значение режима фильтрации ..., ошибка: ...
+	TieModeInvalidValue dic.IError
+
+	// ValueCannotBeNegative Передано значение ..., значение не может быть отрицательным.
+	ValueCannotBeNegative dic.IError
+
+	// ByFormat Формат значения сортировки не верный.
+	ByFormat dic.IError
+
+	// ByDirectionUnknown Неизвестный порядок сортировки ..., ожидался asc или desc.
+	ByDirectionUnknown dic.IError
+
+	// ByDirectionField Указана сортировка по не известному полю ...
+	ByDirectionField dic.IError
+
+	// FilterFormat Формат значения фильтрации не верный.
+	FilterFormat dic.IError
+
+	// FilterUnknownMethod Неизвестный способ фильтрации ...
+	FilterUnknownMethod dic.IError
+
+	// FilterUnknownField Указана фильтрация по не известному полю ...
+	FilterUnknownField dic.IError
+
+	// FilterValueType Указано значение ... не соответствующее типу ..., ошибка: ...
+	FilterValueType dic.IError
+
+	// PairedTagNotMatch Открывающий тег ... не соответствует закрывающему тегу ...
+	PairedTagNotMatch dic.IError
+
+	// WrongLogicalOperation Не верная логическая операция ...
+	WrongLogicalOperation dic.IError
+
+	// OperatorBracketEmpty Указаны пустые операторные скобки.
+	OperatorBracketEmpty dic.IError
+
+	// OperatorBracketOneItem В операторные скобки заключён один элемент, уберите операторные скобки.
+	OperatorBracketOneItem dic.IError
+
+	// NoLogicalOperationBetweenBrackets Необходимо указать логическую операцию между операторных скобок.
+	NoLogicalOperationBetweenBrackets dic.IError
+
+	// FilterCalledByNameWasNotFound Значение фильтра с названием ... не было найдено в запросе.
+	FilterCalledByNameWasNotFound dic.IError
+
+	// OrmIsNil Передан ORM объект являющейся nil. Ожидался не nil объект.
+	OrmIsNil dic.IError
 }
 
-// RequestIsNil Передан http.Request равный nil.
-func (e *Error) RequestIsNil() Err { return newErr(&errRequestIsNil, 0) }
-
-// MultipleErrorsFound Найдены множественные ошибки.
-func (e *Error) MultipleErrorsFound() Err { return newErr(&errMultipleErrorsFound, 0) }
-
-// LimitReceivedMoreThanOne Получено больше одного значения лимита. Поддерживается только одно значение лимита.
-func (e *Error) LimitReceivedMoreThanOne() Err { return newErr(&errLimitReceivedMoreThanOne, 0) }
-
-// LimitInvalidValue Получено недопустимое значение лимита: ...
-func (e *Error) LimitInvalidValue(s string, err error) Err {
-	return newErr(&errLimitInvalidValue, 0, s, err)
+var errSingleton = &Error{
+	Errors:                            dic.Error(),
+	Panic:                             dic.NewError(cPanic, "паника", "стек").CodeU8().Set(ePanic),
+	RequestIsNil:                      dic.NewError(cRequestIsNil).CodeU8().Set(eRequestIsNil),
+	MultipleErrorsFound:               dic.NewError(cMultipleErrorsFound).CodeU8().Set(eMultipleErrorsFound),
+	LimitReceivedMoreThanOne:          dic.NewError(cLimitReceivedMoreThanOne).CodeU8().Set(eLimitReceivedMoreThanOne),
+	LimitInvalidValue:                 dic.NewError(cLimitInvalidValue, "значение", "ошибка").CodeU8().Set(eLimitInvalidValue),
+	TieModeThanOne:                    dic.NewError(cTieModeThanOne).CodeU8().Set(eTieModeThanOne),
+	TieModeInvalidValue:               dic.NewError(cTieModeInvalidValue, "значение", "ошибка").CodeU8().Set(eTieModeInvalidValue),
+	ValueCannotBeNegative:             dic.NewError(cValueCannotBeNegative, "значение").CodeU8().Set(eValueCannotBeNegative),
+	ByFormat:                          dic.NewError(cByFormat).CodeU8().Set(eByFormat),
+	ByDirectionUnknown:                dic.NewError(cByDirectionUnknown, "значение").CodeU8().Set(eByDirectionUnknown),
+	ByDirectionField:                  dic.NewError(cByDirectionField, "название поля").CodeU8().Set(eByDirectionField),
+	FilterFormat:                      dic.NewError(cFilterFormat).CodeU8().Set(eFilterFormat),
+	FilterUnknownMethod:               dic.NewError(cFilterUnknownMethod, "значение").CodeU8().Set(eFilterUnknownMethod),
+	FilterUnknownField:                dic.NewError(cFilterUnknownField, "название поля").CodeU8().Set(eFilterUnknownField),
+	FilterValueType:                   dic.NewError(cFilterValueType, "значение", "тип", "ошибка").CodeU8().Set(eFilterValueType),
+	PairedTagNotMatch:                 dic.NewError(cPairedTagNotMatch, "тег", "тег").CodeU8().Set(ePairedTagNotMatch),
+	WrongLogicalOperation:             dic.NewError(cWrongLogicalOperation, "операция").CodeU8().Set(eWrongLogicalOperation),
+	OperatorBracketEmpty:              dic.NewError(cOperatorBracketEmpty).CodeU8().Set(eOperatorBracketEmpty),
+	OperatorBracketOneItem:            dic.NewError(cOperatorBracketOneItem).CodeU8().Set(eOperatorBracketOneItem),
+	NoLogicalOperationBetweenBrackets: dic.NewError(cNoLogicalOperationBetweenBrackets).CodeU8().Set(eNoLogicalOperationBetweenBrackets),
+	FilterCalledByNameWasNotFound:     dic.NewError(cFilterCalledByNameWasNotFound, "название").CodeU8().Set(eFilterCalledByNameWasNotFound),
+	OrmIsNil:                          dic.NewError(cOrmIsNil).CodeU8().Set(eOrmIsNil),
 }
 
-// TieModeThanOne Получено больше одного значения режима фильтрации. Поддерживается только одно значение режима
-// фильтрации.
-func (e *Error) TieModeThanOne() Err { return newErr(&errTieModeThanOne, 0) }
-
-// TieModeInvalidValue Получено недопустимое значение режима фильтрации ..., ошибка: ...
-func (e *Error) TieModeInvalidValue(s string, err error) Err {
-	return newErr(&errTieModeInvalidValue, 0, s, err)
-}
-
-// ValueCannotBeNegative Передано значение ..., значение не может быть отрицательным.
-func (e *Error) ValueCannotBeNegative(v any) Err {
-	return newErr(&errValueCannotBeNegative, 0, v)
-}
-
-// ByFormat Формат значения сортировки не верный.
-func (e *Error) ByFormat() Err { return newErr(&errByFormat, 0) }
-
-// ByDirectionUnknown Неизвестный порядок сортировки ..., ожидался asc или desc.
-func (e *Error) ByDirectionUnknown(s string) Err { return newErr(&errByDirectionUnknown, 0, s) }
-
-// ByDirectionField Указана сортировка по не известному полю ...
-func (e *Error) ByDirectionField(s string) Err { return newErr(&errByDirectionField, 0, s) }
-
-// FilterFormat Формат значения фильтрации не верный.
-func (e *Error) FilterFormat() Err { return newErr(&errFilterFormat, 0) }
-
-// FilterUnknownMethod Неизвестный способ фильтрации ...
-func (e *Error) FilterUnknownMethod(s string) Err { return newErr(&errFilterUnknownMethod, 0, s) }
-
-// FilterUnknownField Указана фильтрация по не известному полю ...
-func (e *Error) FilterUnknownField(s string) Err { return newErr(&errFilterUnknownField, 0, s) }
-
-// FilterValueType Указано значение ... не соответствующее типу ..., ошибка: ...
-func (e *Error) FilterValueType(s string, t FieldType, err error) Err {
-	return newErr(&errFilterValueType, 0, s, t, err)
-}
-
-// PairedTagNotMatch Открывающий тег ... не соответствует закрывающему тегу ...
-func (e *Error) PairedTagNotMatch(beg string, end string) Err {
-	return newErr(&errPairedTagNotMatch, 0, beg, end)
-}
-
-// WrongLogicalOperation Не верная логическая операция ...
-func (e *Error) WrongLogicalOperation(op Origin) Err {
-	return newErr(&errWrongLogicalOperation, 0, op)
-}
-
-// OperatorBracketEmpty Указаны пустые операторные скобки.
-func (e *Error) OperatorBracketEmpty() Err { return newErr(&errOperatorBracketEmpty, 0) }
-
-// OperatorBracketOneItem В операторные скобки заключён один элемент, уберите операторные скобки.
-func (e *Error) OperatorBracketOneItem() Err { return newErr(&errOperatorBracketOneItem, 0) }
-
-// NoLogicalOperationBetweenBrackets Необходимо указать логическую операцию между операторных скобок.
-func (e *Error) NoLogicalOperationBetweenBrackets() Err {
-	return newErr(&errNoLogicalOperationBetweenBrackets, 0)
-}
-
-// FilterCalledByNameWasNotFound Значение фильтра с названием ... не было найдено в запросе.
-func (e *Error) FilterCalledByNameWasNotFound(name string) Err {
-	return newErr(&errFilterCalledByNameWasNotFound, 0, name)
-}
-
-// OrmIsNil Передан ORM объект являющейся nil. Ожидался не nil объект.
-func (e *Error) OrmIsNil() Err { return newErr(&errOrmIsNil, 0) }
+// Errors Справочник ошибок.
+func Errors() *Error { return errSingleton }

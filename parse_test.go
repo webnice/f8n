@@ -11,8 +11,6 @@ func TestParseRequestWithNil(t *testing.T) {
 	var (
 		err error
 		obj *impl
-		ero Err
-		ok  bool
 	)
 
 	// Проверка ошибки паники.
@@ -21,15 +19,8 @@ func TestParseRequestWithNil(t *testing.T) {
 		t.Errorf("ParseRequest() == nil, ожидалась ошибка.")
 		return
 	}
-	if ero, ok = err.(Err); !ok {
-		t.Errorf("ParseRequest() = %q, не верный тип ошибки.", err)
-		return
-	}
-	if ero.Anchor() != Errors().RequestIsNil().Anchor() {
-		t.Errorf("ParseRequest() = %q, ожидалось: %q",
-			ero.Error(),
-			Errors().RequestIsNil().Error(),
-		)
+	if !Errors().RequestIsNil.Is(err) {
+		t.Errorf("ParseRequest() = %q, ожидалось: %q", err, Errors().RequestIsNil.Bind())
 		return
 	}
 }
@@ -53,8 +44,6 @@ func TestMultipleErrorsFound(t *testing.T) {
 		err      error
 		rq       *http.Request
 		obj      *impl
-		ero      Err
-		ok       bool
 		errCount uint64
 	)
 
@@ -67,15 +56,8 @@ func TestMultipleErrorsFound(t *testing.T) {
 		t.Errorf("ParseRequest() == nil, ожидалась ошибка.")
 		return
 	}
-	if ero, ok = err.(Err); !ok {
-		t.Errorf("ParseRequest() = %q, не верный тип ошибки.", err)
-		return
-	}
-	if ero.Anchor() != Errors().MultipleErrorsFound().Anchor() {
-		t.Errorf("ParseRequest() = %q, ожидалось: %q",
-			ero.Error(),
-			Errors().MultipleErrorsFound().Error(),
-		)
+	if !Errors().MultipleErrorsFound.Is(err) {
+		t.Errorf("ParseRequest() = %q, ожидалось: %q", err, Errors().MultipleErrorsFound.Bind())
 		return
 	}
 }

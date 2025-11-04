@@ -25,11 +25,11 @@ func (f8n *impl) ParseRequest(rq *http.Request, errorFn ...OnErrorFunc) (err err
 	// При вызове внешней функции errorFn, возможна паника.
 	defer func() {
 		if e := recover(); e != nil {
-			err = f8n.Errors().Panic(e, runtimeDebug.Stack())
+			err = f8n.Errors().Panic.Bind(e, runtimeDebug.Stack())
 		}
 	}()
 	if rq == nil {
-		err = f8n.Errors().RequestIsNil()
+		err = f8n.Errors().RequestIsNil.Bind()
 		return
 	}
 	// Загрузка лимита.
@@ -61,7 +61,7 @@ func (f8n *impl) ParseRequest(rq *http.Request, errorFn ...OnErrorFunc) (err err
 	}
 	// Подготовка данных для вызова внешней функции errorFn для передачи ошибок.
 	if err = ers[0].Ei; len(ers) > 1 {
-		err = f8n.Errors().MultipleErrorsFound()
+		err = f8n.Errors().MultipleErrorsFound.Bind()
 	}
 	rei = kitModuleAns.New(nil).
 		NewRestError(dic.Status().BadRequest, err).

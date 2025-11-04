@@ -9,12 +9,12 @@ import (
 // Анализатор, выделение сущности, проверка.
 func (f8n *impl) analysis(node *Map) (ret []*ParseError) {
 	var (
-		fxp func([]*ParseError, Err) []*ParseError
+		fxp func([]*ParseError, error) []*ParseError
 		n   int
 	)
 
 	// Функция сборки ошибки.
-	fxp = func(r []*ParseError, e Err) []*ParseError {
+	fxp = func(r []*ParseError, e error) []*ParseError {
 		var eo = &ParseError{Ei: e}
 		eo.Ev = append(eo.Ev, kitModuleAns.RestErrorField{
 			Field:   keyFilter,
@@ -42,23 +42,23 @@ func (f8n *impl) analysis(node *Map) (ret []*ParseError) {
 		switch node.Origin {
 		case OriginUnknown:
 			if node.TagBegin == pairBeg || node.TagEnd == pairEnd {
-				ret = fxp(ret, f8n.Errors().PairedTagNotMatch(node.TagBegin, node.TagEnd))
+				ret = fxp(ret, f8n.Errors().PairedTagNotMatch.Bind(node.TagBegin, node.TagEnd))
 				return
 			}
 		case OriginOperatorBracket:
 			if node.TagBegin != pairBeg || node.TagEnd != pairEnd {
-				ret = fxp(ret, f8n.Errors().PairedTagNotMatch(node.TagBegin, node.TagEnd))
+				ret = fxp(ret, f8n.Errors().PairedTagNotMatch.Bind(node.TagBegin, node.TagEnd))
 				return
 			}
 		}
 	}()
 	// Проверка операторных скобок.
 	if node.Origin == OriginOperatorBracket && len(node.Node) == 0 {
-		ret = fxp(ret, f8n.Errors().OperatorBracketEmpty())
+		ret = fxp(ret, f8n.Errors().OperatorBracketEmpty.Bind())
 		return
 	}
 	if node.Origin == OriginOperatorBracket && len(node.Node) == 1 {
-		ret = fxp(ret, f8n.Errors().OperatorBracketOneItem())
+		ret = fxp(ret, f8n.Errors().OperatorBracketOneItem.Bind())
 		return
 	}
 	// Между операторными скобками должна быть логическая операция.
@@ -67,12 +67,12 @@ func (f8n *impl) analysis(node *Map) (ret []*ParseError) {
 			switch n {
 			case 0:
 				if len(node.Node) > 1 && node.Node[n+1].Origin == OriginOperatorBracket {
-					ret = fxp(ret, f8n.Errors().NoLogicalOperationBetweenBrackets())
+					ret = fxp(ret, f8n.Errors().NoLogicalOperationBetweenBrackets.Bind())
 					return
 				}
 			default:
 				if node.Node[n-1].Origin == OriginOperatorBracket {
-					ret = fxp(ret, f8n.Errors().NoLogicalOperationBetweenBrackets())
+					ret = fxp(ret, f8n.Errors().NoLogicalOperationBetweenBrackets.Bind())
 					return
 				}
 			}
@@ -83,12 +83,12 @@ func (f8n *impl) analysis(node *Map) (ret []*ParseError) {
 		if node.Node[n].Origin == OriginOr || node.Node[n].Origin == OriginAnd {
 			// Не указан второй аргумент для логической операции.
 			if n == 0 || n == len(node.Node)-1 {
-				ret = fxp(ret, f8n.Errors().WrongLogicalOperation(node.Node[n].Origin))
+				ret = fxp(ret, f8n.Errors().WrongLogicalOperation.Bind(node.Node[n].Origin))
 				return
 			}
 			// Логическая операция применяется к логической операции (справа).
 			if node.Node[n+1].Origin == OriginOr || node.Node[n+1].Origin == OriginAnd {
-				ret = fxp(ret, f8n.Errors().WrongLogicalOperation(node.Node[n].Origin))
+				ret = fxp(ret, f8n.Errors().WrongLogicalOperation.Bind(node.Node[n].Origin))
 				return
 			}
 		}
@@ -97,12 +97,12 @@ func (f8n *impl) analysis(node *Map) (ret []*ParseError) {
 			switch n {
 			case 0:
 				if len(node.Node) > 1 && (node.Node[n+1].Origin != OriginOr && node.Node[n+1].Origin != OriginAnd) {
-					ret = fxp(ret, f8n.Errors().WrongLogicalOperation(node.Node[n].Origin))
+					ret = fxp(ret, f8n.Errors().WrongLogicalOperation.Bind(node.Node[n].Origin))
 					return
 				}
 			default:
 				if node.Node[n-1].Origin != OriginOr && node.Node[n-1].Origin != OriginAnd {
-					ret = fxp(ret, f8n.Errors().WrongLogicalOperation(node.Node[n].Origin))
+					ret = fxp(ret, f8n.Errors().WrongLogicalOperation.Bind(node.Node[n].Origin))
 					return
 				}
 			}

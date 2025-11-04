@@ -22,7 +22,7 @@ func (f8n *impl) GormSepFilter(orm *gorm.DB) (ret *gorm.DB, filter *gorm.DB, err
 	var n int
 
 	if orm == nil {
-		err = f8n.Errors().OrmIsNil()
+		err = f8n.Errors().OrmIsNil.Bind()
 		return
 	}
 	defer func() { ret = orm }()

@@ -127,10 +127,22 @@ func (filter Filter) queryGorm() (query string, values []any) {
 			_, _ = q.WriteString(" NOT LIKE ?")
 			values = append(values, filter.queryGormValueLike())
 		}
-	//case filterIn:
-	//	_, _ = q.WriteString()
-	//case filterNotIn:
-	//	_, _ = q.WriteString()
+	case filterIn:
+		switch filter.Value.Type {
+		case TypeSliceString, TypeSliceInt64, TypeSliceUint64:
+			_, _ = q.WriteString(" IN (?)")
+			values = append(values, filter.Value.Value())
+		default:
+			break
+		}
+	case filterNotIn:
+		switch filter.Value.Type {
+		case TypeSliceString, TypeSliceInt64, TypeSliceUint64:
+			_, _ = q.WriteString(" NOT IN (?)")
+			values = append(values, filter.Value.Value())
+		default:
+			break
+		}
 	default:
 		_, _ = q.WriteString("Метод sql запроса `")
 		_, _ = q.WriteString(filter.Method.String())

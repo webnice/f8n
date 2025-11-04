@@ -18,7 +18,7 @@ func (f8n *impl) ParseLimit(rq *http.Request) (ret []*ParseError) {
 	)
 
 	if src = rq.URL.Query()[keyLimit]; len(src) > 1 {
-		ero = &ParseError{Ei: f8n.Errors().LimitReceivedMoreThanOne()}
+		ero = &ParseError{Ei: f8n.Errors().LimitReceivedMoreThanOne.Bind()}
 		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyLimit,
 			FieldValue: strings.Join(src, ", "),
@@ -48,7 +48,7 @@ func (f8n *impl) ParseLimit(rq *http.Request) (ret []*ParseError) {
 			ret = append(ret, ero)
 		}
 		if i64o < 0 {
-			ero = &ParseError{Ei: f8n.Errors().ValueCannotBeNegative(i64o)}
+			ero = &ParseError{Ei: f8n.Errors().ValueCannotBeNegative.Bind(i64o)}
 			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyLimit,
 				FieldValue: tmp[0],

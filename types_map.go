@@ -114,7 +114,7 @@ func (mp *Map) LoadAndParseFilter(rq *http.Request) (ret []*ParseError) {
 	if mp.Origin == OriginFiltration && mp.Content != "" {
 		keyFilter = strings.TrimSpace(mp.Content)
 		if filters, ok = rq.URL.Query()[keyFilter]; !ok {
-			ero = &ParseError{Ei: mp.parent.Errors().FilterCalledByNameWasNotFound(keyFilter)}
+			ero = &ParseError{Ei: mp.parent.Errors().FilterCalledByNameWasNotFound.Bind(keyFilter)}
 			ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 				Field:      keyMap,
 				FieldValue: keyFilter,
