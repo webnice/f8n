@@ -43,10 +43,10 @@ const (
 	// Не похоже.
 	filterNotLikeThan = FilterMethod("kn")
 
-	// Идентификаторы из списка.
+	// Значения из списка.
 	filterIn = FilterMethod("in")
 
-	// Идентификаторы не из списка.
+	// Значения не из списка.
 	filterNotIn = FilterMethod("ni")
 )
 

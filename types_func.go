@@ -85,8 +85,11 @@ func (fvo FilterValue) SliceInt64() (ret []int64, err error) {
 	str = strings.Split(fvo.Source, sepInNi)
 	ret = make([]int64, 0, len(str))
 	for n = range str {
-		if tmp, err = strconv.ParseInt(str[n], 10, 64); err != nil {
-			return
+		if tmp = 0; str[n] != "" {
+			if tmp, err = strconv.ParseInt(str[n], 10, 64); err != nil {
+				err = Errors().FilterValueType.Bind(str[n], "int64", err)
+				return
+			}
 		}
 		ret = append(ret, tmp)
 	}
@@ -105,8 +108,11 @@ func (fvo FilterValue) SliceUint64() (ret []uint64, err error) {
 	str = strings.Split(fvo.Source, sepInNi)
 	ret = make([]uint64, 0, len(str))
 	for n = range str {
-		if tmp, err = strconv.ParseUint(str[n], 10, 64); err != nil {
-			return
+		if tmp = 0; str[n] != "" {
+			if tmp, err = strconv.ParseUint(str[n], 10, 64); err != nil {
+				err = Errors().FilterValueType.Bind(str[n], "uint64", err)
+				return
+			}
 		}
 		ret = append(ret, tmp)
 	}

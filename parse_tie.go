@@ -42,6 +42,7 @@ func (f8n *impl) ParseTie(rq *http.Request) (ret []*ParseError) {
 			FieldValue: modes[0],
 			Message:    ero.Ei.Error(),
 		})
+		ret = append(ret, ero)
 		return
 	}
 
