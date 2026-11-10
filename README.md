@@ -1,7 +1,7 @@
 # Filtration
 
 ---
-[![Go Report Card](https://goreportcard.com/badge/github.com/webnice/f8n)](https://goreportcard.com/report/github.com/webnice/f8n)
+[![GoDoc](https://godoc.org/github.com/webnice/f8n?status.png)](http://godoc.org/github.com/webnice/f8n)
 
 ### filtration -> f[iltratio]n -> f[8]n -> f8n
 
