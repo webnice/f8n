@@ -2,6 +2,7 @@ package testdb
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -19,6 +20,7 @@ const (
 	tplMigrateError = "Ошибка автоматической миграции, ошибка: %v."
 	tplTableError   = "Ошибка создания таблицы для %#v."
 	tplTestDatabase = "тестирование sqlite3"
+	tplDatabaseFile = "f8n-test-%d.db"
 	pragForeignKeys = "PRAGMA foreign_keys = ON"
 )
 
@@ -50,9 +52,13 @@ func init() {
 }
 
 // OpenTestConnection Открытие тестового соединения с тестовой базой данных.
+// Имя файла базы данных уникально для каждого процесса, исключая конфликты параллельных прогонов тестов.
 func OpenTestConnection(cfg *gorm.Config) (db *gorm.DB, err error) {
+	var file string
+
 	log.Println(tplTestDatabase)
-	if db, err = gorm.Open(sqlite.Open(filepath.Join(os.TempDir(), "gorm.db")), cfg); err != nil {
+	file = filepath.Join(os.TempDir(), fmt.Sprintf(tplDatabaseFile, os.Getpid()))
+	if db, err = gorm.Open(sqlite.Open(file), cfg); err != nil {
 		return
 	}
 
