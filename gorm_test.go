@@ -12,7 +12,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// Проверка тестового окружения базы данных.
 func testGorm(t *testing.T) (ret *gorm.DB) {
+	const tplQueryTables = "SELECT `name` FROM `sqlite_master` WHERE type=? ORDER BY `name`"
 	var (
 		err        error
 		sqlDB      *sql.DB
@@ -27,7 +29,7 @@ func testGorm(t *testing.T) (ret *gorm.DB) {
 	if sqlDB, err = ret.DB(); err != nil {
 		t.Errorf("DB(). Ошибка не ожидалась. Ошибка: %s", err)
 	}
-	if rows, err = sqlDB.Query("SELECT `name` FROM `sqlite_master` WHERE type=? ORDER BY `name`", "table"); err != nil {
+	if rows, err = sqlDB.Query(tplQueryTables, "table"); err != nil {
 		t.Errorf("Query(). Ошибка не ожидалась. Ошибка: %s", err)
 	}
 	for rows.Next() {
@@ -113,6 +115,7 @@ func TestGorm(t *testing.T) {
 			},
 		}
 	)
+
 	f8n, orm = New(), testGorm(t)
 	for n = range tests {
 		// Создание запроса.
@@ -142,5 +145,115 @@ func TestGorm(t *testing.T) {
 			t.Log("Ошибка формирования запроса.")
 			t.Errorf("Получен запрос:\n %q, ожидался:\n %q", rexQuery[3], tests[n].Query)
 		}
+	}
+}
+
+// Тестирование создания ORM условий запроса со всеми разобранными значениями.
+func TestGormFull(t *testing.T) {
+	const (
+		qTpl          = `http://localhost?%s`
+		datUrn        = "filter=id:eq:1&filter=key:eq:2&tie=or&by=id:asc&by=name:desc&limit=5:10"
+		wantQuery     = "`id` = 1 OR `key` = 2 ORDER BY `id` ASC,`name` DESC LIMIT 10 OFFSET 5"
+		wantOrder     = "ORDER BY `id` ASC,`name` DESC"
+		wantLimit     = "LIMIT 10 OFFSET 5"
+		tplErrorUrn   = "Ошибка создания запроса: %s."
+		tplErrorParse = "ParseRequest(). Ошибка не ожидалась. Ошибка: %s."
+		tplErrorGorm  = "Gorm(). Ошибка не ожидалась. Ошибка: %s."
+	)
+	var (
+		err      error
+		rq       *http.Request
+		f8n      Interface
+		orm      *gorm.DB
+		dryOrm   *gorm.DB
+		stmt     *gorm.Statement
+		tmp      testdb.Child
+		query    string
+		rexQuery []string
+	)
+
+	f8n, orm = New(), testGorm(t)
+	f8n.
+		FieldDatatype("id", TypeUint64).
+		FieldDatatype("key", TypeInt64)
+	// Создание запроса.
+	if rq, err = http.NewRequest("GET", fmt.Sprintf(qTpl, datUrn), nil); err != nil {
+		t.Errorf(tplErrorUrn, err)
+	}
+	// Разбор запроса.
+	if err = f8n.ParseRequest(rq); err != nil {
+		t.Errorf(tplErrorParse, err)
+	}
+	// Добавление условий из запроса в ORM.
+	dryOrm = orm.Session(&gorm.Session{DryRun: true})
+	if dryOrm, err = f8n.Gorm(dryOrm); err != nil {
+		t.Errorf(tplErrorGorm, err)
+	}
+	stmt = dryOrm.Find(&tmp).Statement
+	query = orm.Dialector.Explain(stmt.SQL.String(), stmt.Vars...)
+	// Проверка фильтрации, режим tie=or.
+	if rexQuery = testdb.RexWhere.FindStringSubmatch(query); len(rexQuery) < 4 {
+		t.Errorf("SQL запрос: %s", query)
+	}
+	if !strings.EqualFold(rexQuery[3], wantQuery) {
+		t.Errorf("Условие WHERE запроса:\n %q, ожидалось:\n %q", rexQuery[3], wantQuery)
+	}
+	// Проверка сортировки.
+	if !strings.Contains(query, wantOrder) {
+		t.Errorf("SQL запрос: %s, ожидалась сортировка: %s", query, wantOrder)
+	}
+	// Проверка лимитов.
+	if !strings.Contains(query, wantLimit) {
+		t.Errorf("SQL запрос: %s, ожидались лимиты: %s", query, wantLimit)
+	}
+}
+
+// Тестирование создания ORM условий запроса с переопределением названий полей.
+func TestGormRedefinition(t *testing.T) {
+	const (
+		qTpl          = `http://localhost?%s`
+		datUrn        = "filter=id:eq:1"
+		wantQuery     = "`cursor`.`id` = 1"
+		tplErrorUrn   = "Ошибка создания запроса: %s."
+		tplErrorParse = "ParseRequest(). Ошибка не ожидалась. Ошибка: %s."
+		tplErrorGorm  = "Gorm(). Ошибка не ожидалась. Ошибка: %s."
+	)
+	var (
+		err      error
+		rq       *http.Request
+		f8n      Interface
+		orm      *gorm.DB
+		dryOrm   *gorm.DB
+		stmt     *gorm.Statement
+		tmp      testdb.Child
+		query    string
+		rexQuery []string
+	)
+
+	f8n, orm = New(), testGorm(t)
+	f8n.
+		FieldDatatype("id", TypeUint64).
+		Redefinition("id", "`cursor`.`id`")
+	// Создание запроса.
+	if rq, err = http.NewRequest("GET", fmt.Sprintf(qTpl, datUrn), nil); err != nil {
+		t.Errorf(tplErrorUrn, err)
+	}
+	// Разбор запроса.
+	if err = f8n.ParseRequest(rq); err != nil {
+		t.Errorf(tplErrorParse, err)
+	}
+	// Добавление условий из запроса в ORM.
+	dryOrm = orm.Session(&gorm.Session{DryRun: true})
+	if dryOrm, err = f8n.Gorm(dryOrm); err != nil {
+		t.Errorf(tplErrorGorm, err)
+	}
+	stmt = dryOrm.Find(&tmp).Statement
+	query = orm.Dialector.Explain(stmt.SQL.String(), stmt.Vars...)
+	// Проверка фильтрации с переопределённым названием поля.
+	if rexQuery = testdb.RexWhere.FindStringSubmatch(query); len(rexQuery) < 4 {
+		t.Errorf("SQL запрос: %s", query)
+	}
+	if !strings.EqualFold(rexQuery[3], wantQuery) {
+		t.Errorf("Условие WHERE запроса:\n %q, ожидалось:\n %q", rexQuery[3], wantQuery)
 	}
 }

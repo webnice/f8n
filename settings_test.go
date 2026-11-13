@@ -2,8 +2,12 @@ package f8n
 
 import "testing"
 
-// Тестирование перечисление обрабатываемых полей с заменой недопустимых символов в названии полей.
+// Тестирование перечисления обрабатываемых полей с заменой недопустимых символов в названии полей.
 func TestFieldSetGet(t *testing.T) {
+	const (
+		tplErrorFieldSet = "FieldSet() = %v, ожидалось %v."
+		tplErrorFieldGet = "FieldGet() = %v, ожидалось %v."
+	)
 	var (
 		dat []string
 		obj *impl
@@ -14,29 +18,34 @@ func TestFieldSetGet(t *testing.T) {
 	obj = New().(*impl)
 	obj.FieldSet(dat...)
 	if len(obj.FieldOnly) != len(dat) {
-		t.Errorf("FieldSet() = %v, ожидалаось %v.", obj.FieldOnly, dat)
+		t.Errorf(tplErrorFieldSet, obj.FieldOnly, dat)
 	}
 	if get = obj.FieldGet(); get[4] != dat[4] ||
 		get[0] == dat[0] ||
 		get[1] == dat[1] ||
 		get[2] == dat[2] ||
 		get[3] == dat[3] {
-		t.Errorf("FieldGet() = %v, ожидалаось %v.", get, dat)
+		t.Errorf(tplErrorFieldGet, get, dat)
 	}
 }
 
 // Тестирование назначения типа данных загружаемым значениям полей.
 func TestFieldDatatype(t *testing.T) {
+	const (
+		tplErrorDatatypeNil  = "Datatype map = nil, ожидалась инициализация map[string]Datatype."
+		tplErrorDatatypeLen  = "Datatype map = %d, ожидалось %d."
+		tplErrorDatatypeInit = "Datatype map не пустой, ожидалась пустая карта."
+	)
 	var (
 		obj *impl
 	)
 
 	obj = New().(*impl)
 	if obj.Datatype == nil {
-		t.Errorf("Datatype map = nil, ожидалась инициализация map[string]Datatype.")
+		t.Errorf(tplErrorDatatypeNil)
 	}
 	if len(obj.Datatype) != 0 {
-		t.Errorf("Datatype map не пустой, ожидалась пустая карта.")
+		t.Errorf(tplErrorDatatypeInit)
 	}
 	obj.
 		FieldDatatype("id", TypeUint64).
@@ -46,25 +55,30 @@ func TestFieldDatatype(t *testing.T) {
 		FieldDatatype("normal", TypeBool).
 		FieldDatatype("mId", TypeInt64)
 	if len(obj.Datatype) != 6 {
-		t.Errorf("Datatype map = %d, ожидалось %d.", len(obj.Datatype), 6)
+		t.Errorf(tplErrorDatatypeLen, len(obj.Datatype), 6)
 	}
 }
 
 // Тестирование переопределения названий полей.
 func TestRedefinition(t *testing.T) {
+	const (
+		tplErrorRemapNil  = "Remap map = nil, ожидалась инициализация map[string]string."
+		tplErrorRemapLen  = "Remap map = %d, ожидалось %d."
+		tplErrorRemapInit = "Remap map не пустой, ожидалась пустая карта."
+	)
 	var (
 		obj *impl
 	)
 
 	obj = New().(*impl)
 	if obj.Remap == nil {
-		t.Errorf("Remap map = nil, ожидалась инициализация map[string]string.")
+		t.Errorf(tplErrorRemapNil)
 	}
 	if len(obj.Remap) != 0 {
-		t.Errorf("Remap map не пустой, ожидалась пустая карта.")
+		t.Errorf(tplErrorRemapInit)
 	}
 	obj.Redefinition("mId", "`method`.`mId`")
 	if len(obj.Remap) != 1 {
-		t.Errorf("Remap map = %d, ожидалось %d.", len(obj.Remap), 1)
+		t.Errorf(tplErrorRemapLen, len(obj.Remap), 1)
 	}
 }

@@ -18,6 +18,11 @@ func TestAnalysis(t *testing.T) {
 			Error dic.IError
 		}
 	)
+	const (
+		tplErrorRequest = "Ошибка создания запроса: %s."
+		tplErrorEmpty   = "ParseRequest() == nil, ожидалась ошибка."
+		tplErrorIs      = "ParseRequest() = %q, ожидалось: %q"
+	)
 	var (
 		err   error
 		obj   *impl
@@ -96,16 +101,16 @@ func TestAnalysis(t *testing.T) {
 	for n = range tests {
 		obj.Reset()
 		if rq, err = http.NewRequest("GET", strings.ReplaceAll(tests[n].Data, "\n", ""), nil); err != nil {
-			t.Errorf("Ошибка создания запроса: %s", err)
+			t.Errorf(tplErrorRequest, err)
 		}
 		if err = obj.ParseRequest(rq); err == nil {
 			t.Logf("данные: %s", tests[n].Data)
-			t.Errorf("ParseRequest() == nil, ожидалась ошибка.")
+			t.Errorf(tplErrorEmpty)
 			return
 		}
 		if !tests[n].Error.Is(err) {
 			t.Logf("данные: %s", tests[n].Data)
-			t.Errorf("ParseRequest() = %q, ожидалось: %q", err, tests[n].Error.Bind())
+			t.Errorf(tplErrorIs, err, tests[n].Error.Bind())
 			return
 		}
 	}

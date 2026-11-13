@@ -11,7 +11,8 @@ import (
 
 // Тестовый запрос.
 func testData1(t *testing.T) string {
-	const data = `http://localhost
+	const (
+		data = `http://localhost
 ?map=f1:or:f2:or:(f5:and:f3)
 &map=f3:and:f4
 &f1=id:ge:10
@@ -20,6 +21,10 @@ func testData1(t *testing.T) string {
 &f4=devicedisplayName:ke:Солнечная система
 &f5=approximately:ge:1.1
 &limit=%d:%d`
+		tplBy           = "&by=%s:%s"
+		tplFilter       = "&filter=%s:%s:%s"
+		tplErrorRequest = "Ошибка создания запроса: %s."
+	)
 	var (
 		tmp string
 		lim []uint64
@@ -34,10 +39,10 @@ func testData1(t *testing.T) string {
 		makeTestContent(t, 0, []Filter{})
 	tmp = strings.ReplaceAll(data, "\n", "")
 	for n = range dir {
-		tmp += fmt.Sprintf("&by=%s:%s", dir[n].Field, dir[n].By)
+		tmp += fmt.Sprintf(tplBy, dir[n].Field, dir[n].By)
 	}
 	for n = range flt {
-		tmp += fmt.Sprintf("&filter=%s:%s:%s", flt[n].Field, flt[n].Method.String(), flt[n].Value.String())
+		tmp += fmt.Sprintf(tplFilter, flt[n].Field, flt[n].Method.String(), flt[n].Value.String())
 	}
 
 	return fmt.Sprintf(tmp, lim[0], lim[1])
@@ -45,7 +50,7 @@ func testData1(t *testing.T) string {
 
 // Тестовый JSON соответствующий запросу.
 func testData2(_ *testing.T) string {
-	return "" +
+	const data = "" +
 		`{"field":["id","key","is_done","devicedisplayName","is_deleted","approximately"],"field_type":{"approximate` +
 		`ly":"float64","id":"uint64","is_deleted":"bool","is_done":"bool","key":"int64"},"remap":{"is_deleted":"isDe` +
 		`leted","is_done":"isDone"},"offset":101,"limit":3,"by":[{"field":"devicedisplayName","direction":"asc"},{"f` +
@@ -68,6 +73,8 @@ func testData2(_ *testing.T) string {
 		`ent":"","filter":null,"size":5,"node":null},{"beg":"","end":"","origin":"filtration","content":"f4","filter` +
 		`":{"field":"devicedisplayName","method":"ke","value":{"source":"Солнечная система","type":"string"}},"size"` +
 		`:2,"node":null}]}]}}`
+
+	return data
 }
 
 // Тип данных для дженерика.
@@ -77,6 +84,11 @@ type testContentModel interface {
 
 // Дженерик, возвращает тестовые данные соответствующие запросу и JSON данным.
 func makeTestContent[T testContentModel](t *testing.T, dataID int, data T) (ret T) {
+	const (
+		tplErrorDataID = "Не верный вызов функции makeTestContent[T], необходимо указать dataID > 0"
+		tplErrorType   = "Не верный вызов функции makeTestContent[T], тип: %q"
+	)
+
 	switch typ := any(data).(type) {
 	case string:
 		switch dataID {
@@ -87,7 +99,7 @@ func makeTestContent[T testContentModel](t *testing.T, dataID int, data T) (ret 
 		case 3:
 			ret = any("(f1:or:f2:or:(f5:and:f3)):and:(f3:and:f4)").(T)
 		default:
-			t.Errorf("Не верный вызов функции makeTestContent[T], необходимо указать dataID > 0")
+			t.Errorf(tplErrorDataID)
 		}
 	case []string:
 		ret = any(append(typ, []string{
@@ -110,17 +122,19 @@ func makeTestContent[T testContentModel](t *testing.T, dataID int, data T) (ret 
 		typ = append(typ, Filter{Field: "is_deleted", Method: "eq", Value: FilterValue{Source: "false", Type: "bool"}})
 		ret = any(typ).(T)
 	default:
-		t.Errorf("Не верный вызов функции makeTestContent[T], тип: %q", reflect.TypeOf(typ).String())
+		t.Errorf(tplErrorType, reflect.TypeOf(typ).String())
 	}
 
 	return
 }
 
+// Создание тестового объекта с разобранным тестовым запросом.
 func makeTestObject(t *testing.T) (ret Interface, err error) {
+	const tplErrorRequest = "Ошибка создания запроса: %s."
 	var rq *http.Request
 
 	if rq, err = http.NewRequest("GET", makeTestContent(t, 1, ""), nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+		t.Errorf(tplErrorRequest, err)
 	}
 	ret = New().FieldSet(makeTestContent(t, 0, []string{})...)
 	for key, val := range makeTestContent(t, 0, Datatype{}) {
@@ -136,6 +150,12 @@ func makeTestObject(t *testing.T) (ret Interface, err error) {
 
 // Тестирование экспорта разобранных значений фильтрации в формат JSON.
 func TestExportJson(t *testing.T) {
+	const (
+		tplErrorParse  = "ParseRequest() != nil, ошибка не ожидались. Ошибка: %s"
+		tplErrorValue  = "вернулось значение: %s"
+		tplErrorWanted = "ожидалось значение: %s"
+		tplErrorResult = "ExportJson() вернул не корректный результат."
+	)
 	var (
 		err error
 		obj Interface
@@ -143,21 +163,34 @@ func TestExportJson(t *testing.T) {
 	)
 
 	if obj, err = makeTestObject(t); err != nil {
-		t.Errorf("ParseRequest() != nil, ошибка не ожидались. Ошибка: %s", err)
+		t.Errorf(tplErrorParse, err)
 		return
 	}
 	// Выполнение экспорта.
 	if exp = obj.ExportJson("", "").
 		String(); !strings.EqualFold(strings.TrimSpace(exp), makeTestContent(t, 2, "")) {
-		t.Logf("вернулось значение: %s", strings.TrimSpace(exp))
-		t.Logf("ожидалось значение: %s", makeTestContent(t, 2, ""))
-		t.Errorf("ExportJson() вернул не корректный результат.")
+		t.Logf(tplErrorValue, strings.TrimSpace(exp))
+		t.Logf(tplErrorWanted, makeTestContent(t, 2, ""))
+		t.Errorf(tplErrorResult)
 		return
 	}
 }
 
 // Тестирование импорта JSON.
 func TestImportJson(t *testing.T) {
+	const (
+		datBadJSON       = "}}{"
+		tplErrorParse    = "ParseRequest() != nil, ошибка не ожидались. Ошибка: %s"
+		tplErrorBadJSON  = "ImportJson() == nil, ожидались ошибка."
+		tplErrorImport   = "ImportJson() != nil, ошибка не ожидались. Ошибка: %s"
+		tplErrorFieldSet = "ImportJson() -> FieldSet() не совпадает. Импортировано: [%v] ожидалось: [%v]"
+		tplErrorDatatype = "ImportJson() -> FieldDatatype() не совпадает. Импортировано: [%v] ожидалось: [%v]"
+		tplErrorRemap    = "ImportJson() -> Redefinition() не совпадает. Импортировано: [%v] ожидалось: [%v]"
+		tplErrorLimit    = "ImportJson() -> Limit[] не совпадает. Импортировано: [%v] ожидалось: [%v]"
+		tplErrorBy       = "ImportJson() -> By[] не совпадает. Импортировано: [%v] ожидалось: [%v]"
+		tplErrorFilter   = "ImportJson() -> Filter[] не совпадает. Импортировано: [%v] ожидалось: [%v]"
+		tplErrorMap      = "ImportJson() -> Map[] не совпадает. Импортировано: [%v] ожидалось: [%v]"
+	)
 	var (
 		err error
 		obj Interface
@@ -167,18 +200,18 @@ func TestImportJson(t *testing.T) {
 	)
 
 	if obj, err = makeTestObject(t); err != nil {
-		t.Errorf("ParseRequest() != nil, ошибка не ожидались. Ошибка: %s", err)
+		t.Errorf(tplErrorParse, err)
 		return
 	}
 	cft = obj.(*impl).Map
 	obj = New()
-	if err = obj.ImportJson([]byte("}}{")); err == nil {
-		t.Errorf("ImportJson() == nil, ожидались ошибка.")
+	if err = obj.ImportJson([]byte(datBadJSON)); err == nil {
+		t.Errorf(tplErrorBadJSON)
 		return
 	}
 	obj.Reset()
 	if err = obj.ImportJson([]byte(makeTestContent(t, 2, ""))); err != nil {
-		t.Errorf("ImportJson() != nil, ошибка не ожидались. Ошибка: %s", err)
+		t.Errorf(tplErrorImport, err)
 		return
 	}
 	// Проверка импортированных данных.
@@ -186,7 +219,7 @@ func TestImportJson(t *testing.T) {
 	// Сравнение списка обрабатываемых полей.
 	if !reflect.DeepEqual(f8n.FieldOnly, makeTestContent(t, 0, []string{})) {
 		t.Errorf(
-			"ImportJson() -> FieldSet() не совпадает. Импортировано: [%v] ожидалось: [%v]",
+			tplErrorFieldSet,
 			f8n.FieldOnly,
 			makeTestContent(t, 0, []string{}),
 		)
@@ -195,7 +228,7 @@ func TestImportJson(t *testing.T) {
 	// Сравнение типа данных для поля.
 	if !reflect.DeepEqual(f8n.Datatype, makeTestContent(t, 0, Datatype{})) {
 		t.Errorf(
-			"ImportJson() -> FieldDatatype() не совпадает. Импортировано: [%v] ожидалось: [%v]",
+			tplErrorDatatype,
 			f8n.Datatype,
 			makeTestContent(t, 0, Datatype{}),
 		)
@@ -204,7 +237,7 @@ func TestImportJson(t *testing.T) {
 	// Сравнение переопределения названий полей или замены полей.
 	if !reflect.DeepEqual(f8n.Remap, makeTestContent(t, 0, Remap{})) {
 		t.Errorf(
-			"ImportJson() -> Redefinition() не совпадает. Импортировано: [%v] ожидалось: [%v]",
+			tplErrorRemap,
 			f8n.Remap,
 			makeTestContent(t, 0, Remap{}),
 		)
@@ -213,7 +246,7 @@ func TestImportJson(t *testing.T) {
 	// Сравнение лимитов.
 	if lim = makeTestContent(t, 0, []uint64{}); f8n.Offset != lim[0] || f8n.Limit != lim[1] {
 		t.Errorf(
-			"ImportJson() -> Limit[] не совпадает. Импортировано: [%v] ожидалось: [%v]",
+			tplErrorLimit,
 			[]uint64{f8n.Offset, f8n.Limit},
 			lim,
 		)
@@ -222,7 +255,7 @@ func TestImportJson(t *testing.T) {
 	// Сравнение сортировки результата выборки.
 	if !reflect.DeepEqual(f8n.By, makeTestContent(t, 0, []Direction{})) {
 		t.Errorf(
-			"ImportJson() -> By[] не совпадает. Импортировано: [%v] ожидалось: [%v]",
+			tplErrorBy,
 			f8n.By,
 			makeTestContent(t, 0, []Direction{}),
 		)
@@ -231,7 +264,7 @@ func TestImportJson(t *testing.T) {
 	// Сравнение простой фильтрации.
 	if !reflect.DeepEqual(f8n.Filter, makeTestContent(t, 0, []Filter{})) {
 		t.Errorf(
-			"ImportJson() -> Filter[] не совпадает. Импортировано: [%v] ожидалось: [%v]",
+			tplErrorFilter,
 			f8n.Filter,
 			makeTestContent(t, 0, []Filter{}),
 		)
@@ -241,7 +274,7 @@ func TestImportJson(t *testing.T) {
 	cft.setParent(f8n) // Надо поменять для сравнения, так как объект другой.
 	if !reflect.DeepEqual(f8n.Map, cft) {
 		t.Errorf(
-			"ImportJson() -> Map[] не совпадает. Импортировано: [%v] ожидалось: [%v]",
+			tplErrorMap,
 			f8n.Map,
 			cft,
 		)
@@ -251,6 +284,11 @@ func TestImportJson(t *testing.T) {
 
 // Тестирование экспорта настроек фильтрации в объект http.Request.Query().Values, тип данных url.Values.
 func TestQuery(t *testing.T) {
+	const (
+		tplErrorParse = "ParseRequest() != nil, ошибка не ожидались. Ошибка: %s"
+		tplErrorEmpty = "Query() map == \"\". Ошибка значения экспорта."
+		tplErrorValue = "Query() map == %q. Ожидалось значение map = %q"
+	)
 	var (
 		err error
 		obj Interface
@@ -259,24 +297,30 @@ func TestQuery(t *testing.T) {
 	)
 
 	if obj, err = makeTestObject(t); err != nil {
-		t.Errorf("ParseRequest() != nil, ошибка не ожидались. Ошибка: %s", err)
+		t.Errorf(tplErrorParse, err)
 		return
 	}
 	val = obj.Query()
 	// Проверка значений получившегося экспорта.
 	if !val.Has(keyMap) {
-		t.Errorf("Query() map == \"\". Ошибка значения экспорта.")
+		t.Errorf(tplErrorEmpty)
 		return
 	}
 	if tmp = val.Get(keyMap); tmp != makeTestContent(t, 3, "") {
-		t.Errorf("Query() map == %q. Ожидалось значение map = %q", tmp, makeTestContent(t, 3, ""))
+		t.Errorf(tplErrorValue, tmp, makeTestContent(t, 3, ""))
 		return
 	}
 }
 
 // Тестирование экспорта настроек фильтрации в строку.
 func TestString(t *testing.T) {
-	const localhost = `http://localhost?`
+	const (
+		localhost     = `http://localhost?`
+		tplErrorParse = "ParseRequest() != nil, ошибка не ожидались. Ошибка: %s"
+		tplErrorEmpty = "String() == %q, ожидался не пустой результат."
+		tplErrorObj   = "Ошибка функции String(). Получен объект: %v, ожидался: %v\n"
+		tplErrorReq   = "Ошибка создания запроса: %s."
+	)
 	var (
 		err error
 		obj Interface
@@ -287,17 +331,17 @@ func TestString(t *testing.T) {
 	)
 
 	if obj, err = makeTestObject(t); err != nil {
-		t.Errorf("ParseRequest() != nil, ошибка не ожидались. Ошибка: %s", err)
+		t.Errorf(tplErrorParse, err)
 		return
 	}
 	if tmp = obj.String(); tmp == "" {
-		t.Errorf("String() == %q, ожидался не пустой результат.", tmp)
+		t.Errorf(tplErrorEmpty, tmp)
 		return
 	}
 	o1 = obj.(*impl)
 	// Разбор полученного экспорта.
 	if rq, err = http.NewRequest("GET", localhost+tmp, nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+		t.Errorf(tplErrorReq, err)
 	}
 	obj = New().FieldSet(makeTestContent(t, 0, []string{})...)
 	for key, val := range makeTestContent(t, 0, Datatype{}) {
@@ -307,13 +351,13 @@ func TestString(t *testing.T) {
 		obj = obj.Redefinition(key, val)
 	}
 	if err = obj.ParseRequest(rq, func(b []byte, e error) { t.Logf("ошибка: %s", string(b)) }); err != nil {
-		t.Errorf("ParseRequest() != nil, ошибка не ожидались. Ошибка: %s", err)
+		t.Errorf(tplErrorParse, err)
 		return
 	}
 	o2 = obj.(*impl)
 	// Если экспорт и импорт работают корректно, тогда эти объекты должны совпасть.
 	if !reflect.DeepEqual(o1, o2) {
-		t.Errorf("Ошибка функции String(). Получен объект: %v, ожидался: %v\n",
+		t.Errorf(tplErrorObj,
 			strings.TrimSpace(o2.ExportJson("", "").String()),
 			strings.TrimSpace(o1.ExportJson("", "").String()),
 		)
@@ -323,6 +367,12 @@ func TestString(t *testing.T) {
 
 // Тестирование импорта строки запроса.
 func TestImportString(t *testing.T) {
+	const (
+		tplErrorParse  = "ParseRequest() != nil, ошибка не ожидались. Ошибка: %s"
+		tplErrorEmpty  = "String() == %q, ожидался не пустой результат."
+		tplErrorImport = "ImportString() != nil, ошибка не ожидались. Ошибка: %s"
+		tplErrorObj    = "Ошибка функции ImportString(). Получен объект: %v, ожидался: %v\n"
+	)
 	var (
 		err error
 		obj Interface
@@ -332,11 +382,11 @@ func TestImportString(t *testing.T) {
 	)
 
 	if obj, err = makeTestObject(t); err != nil {
-		t.Errorf("ParseRequest() != nil, ошибка не ожидались. Ошибка: %s", err)
+		t.Errorf(tplErrorParse, err)
 		return
 	}
 	if tmp = obj.String(); tmp == "" {
-		t.Errorf("String() == %q, ожидался не пустой результат.", tmp)
+		t.Errorf(tplErrorEmpty, tmp)
 		return
 	}
 	o1 = obj.(*impl)
@@ -349,13 +399,13 @@ func TestImportString(t *testing.T) {
 		obj = obj.Redefinition(key, val)
 	}
 	if err = obj.ImportString(tmp); err != nil {
-		t.Errorf("ImportString() != nil, ошибка не ожидались. Ошибка: %s", err)
+		t.Errorf(tplErrorImport, err)
 		return
 	}
 	o2 = obj.(*impl)
 	// Если экспорт и импорт работают корректно, тогда эти объекты должны совпасть.
 	if !reflect.DeepEqual(o1, o2) {
-		t.Errorf("Ошибка функции ImportString(). Получен объект: %v, ожидался: %v\n",
+		t.Errorf(tplErrorObj,
 			strings.TrimSpace(o2.ExportJson("", "").String()),
 			strings.TrimSpace(o1.ExportJson("", "").String()),
 		)
@@ -365,14 +415,18 @@ func TestImportString(t *testing.T) {
 
 // Тестирование импорта строки запроса содержащей ошибку.
 func TestImportStringWithError(t *testing.T) {
+	const (
+		datBadString  = "\x00\x01\x02\x03\x04\x05"
+		tplErrorEmpty = "ImportString() == nil, ожидалась ошибка."
+	)
 	var (
 		err error
 		obj Interface
 	)
 
 	obj = New()
-	if err = obj.ImportString(string([]byte{0, 1, 2, 3, 4, 5})); err == nil {
-		t.Errorf("ImportString() == nil, ожидалась ошибка.")
+	if err = obj.ImportString(datBadString); err == nil {
+		t.Errorf(tplErrorEmpty)
 		return
 	}
 }

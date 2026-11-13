@@ -4,13 +4,21 @@ import "testing"
 
 // Тестирование надстройки над strconv для int64.
 func TestParseInt64(t *testing.T) {
-	if v, e := parseInt64("", ""); v != 0 || e != nil {
-		t.Errorf("parseInt64(``, ``) = %d, %s; want 0, nil", v, e)
+	const (
+		tplErrorResult = "parseInt64(`%s`, `%s`) = %d, %v; ожидалось: %d, %v."
+		datField       = "test"
+		datEmpty       = ""
+		datNegative    = "-1"
+		datInvalid     = "a-1"
+	)
+
+	if v, e := parseInt64(datEmpty, datEmpty); v != 0 || e != nil {
+		t.Errorf(tplErrorResult, datField, datEmpty, v, e, 0, nil)
 	}
-	if v, e := parseInt64("test", "-1"); v != -1 || e != nil {
-		t.Errorf("parseInt64(`test`, `-1`) = %d, %s; want -1, nil", v, e)
+	if v, e := parseInt64(datField, datNegative); v != -1 || e != nil {
+		t.Errorf(tplErrorResult, datField, datNegative, v, e, -1, nil)
 	}
-	if v, e := parseInt64("test", "a-1"); v != 0 || e == nil {
-		t.Errorf("parseInt64(`test`, `a-1`) = %d, %s; want 0, error", v, e)
+	if v, e := parseInt64(datField, datInvalid); v != 0 || e == nil {
+		t.Errorf(tplErrorResult, datField, datInvalid, v, e, 0, "error")
 	}
 }

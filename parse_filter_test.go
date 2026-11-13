@@ -9,6 +9,11 @@ import (
 
 // Тестирование простой фильтрации - фильтрация отсутствует.
 func TestParseFilterEmpty(t *testing.T) {
+	const (
+		tplErrorRequest = "Ошибка создания запроса: %s."
+		tplErrorFilter  = "ParseFilter() = %v, ошибка не ожидалась."
+		tplErrorByEmpty = "Filter[] = %v, ожидался пустой срез."
+	)
 	var (
 		err error
 		rq  *http.Request
@@ -18,15 +23,15 @@ func TestParseFilterEmpty(t *testing.T) {
 
 	// Пустой срез фильтрации.
 	if rq, err = http.NewRequest("GET", "http://localhost", nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+		t.Errorf(tplErrorRequest, err)
 	}
 	obj = New().(*impl)
 	if ers = obj.ParseFilter(rq); len(ers) > 0 {
-		t.Errorf("ParseFilter() = %v, ошибка не ожидалась.", ers)
+		t.Errorf(tplErrorFilter, ers)
 		return
 	}
 	if len(obj.Filter) > 0 {
-		t.Errorf("Filter[] = %v, ожидался пустой срез.", obj.Filter)
+		t.Errorf(tplErrorByEmpty, obj.Filter)
 		return
 	}
 }
@@ -35,6 +40,12 @@ func TestParseFilterEmpty(t *testing.T) {
 //
 //goland:noinspection ALL
 func TestParseFilterFormat(t *testing.T) {
+	const (
+		datUrn          = "http://localhost?filter=id-asc:s&filter=a-b-c"
+		tplErrorRequest = "Ошибка создания запроса: %s."
+		tplErrorEmpty   = "ParseFilter() = nil, ожидалась ошибка."
+		tplErrorIs      = "ParseFilter() = %q, ожидалось: %q"
+	)
 	var (
 		err error
 		rq  *http.Request
@@ -43,18 +54,18 @@ func TestParseFilterFormat(t *testing.T) {
 		n   int
 	)
 
-	// Не верный формат значения сортировки.
+	// Не верный формат значения фильтрации.
 	obj = New().(*impl)
-	if rq, err = http.NewRequest("GET", "http://localhost?filter=id-asc:s&filter=a-b-c", nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+	if rq, err = http.NewRequest("GET", datUrn, nil); err != nil {
+		t.Errorf(tplErrorRequest, err)
 	}
 	if ers = obj.ParseFilter(rq); len(ers) == 0 {
-		t.Errorf("ParseFilter() = nil, ожидалась ошибка.")
+		t.Errorf(tplErrorEmpty)
 		return
 	}
 	for n = range ers {
 		if !Errors().FilterFormat.Is(ers[n].Ei) {
-			t.Errorf("ParseFilter() = %q, ожидалось: %q", ers[n].Ei, Errors().FilterFormat.Bind())
+			t.Errorf(tplErrorIs, ers[n].Ei, Errors().FilterFormat.Bind())
 			return
 		}
 	}
@@ -64,6 +75,12 @@ func TestParseFilterFormat(t *testing.T) {
 //
 //goland:noinspection ALL
 func TestParseFilterUnknownMethod(t *testing.T) {
+	const (
+		datUrn          = "http://localhost?filter=id:asc:value"
+		tplErrorRequest = "Ошибка создания запроса: %s."
+		tplErrorEmpty   = "ParseFilter() = nil, ожидалась ошибка."
+		tplErrorIs      = "ParseFilter() = %q, ожидалось: %q"
+	)
 	var (
 		err error
 		rq  *http.Request
@@ -72,18 +89,17 @@ func TestParseFilterUnknownMethod(t *testing.T) {
 		n   int
 	)
 
-	// Не верный формат значения сортировки.
 	obj = New().(*impl)
-	if rq, err = http.NewRequest("GET", "http://localhost?filter=id:asc:value", nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+	if rq, err = http.NewRequest("GET", datUrn, nil); err != nil {
+		t.Errorf(tplErrorRequest, err)
 	}
 	if ers = obj.ParseFilter(rq); len(ers) == 0 {
-		t.Errorf("ParseFilter() = nil, ожидалась ошибка.")
+		t.Errorf(tplErrorEmpty)
 		return
 	}
 	for n = range ers {
 		if !Errors().FilterUnknownMethod.Is(ers[n].Ei) {
-			t.Errorf("ParseFilter() = %q, ожидалось: %q", ers[n].Ei, Errors().FilterUnknownMethod.Bind())
+			t.Errorf(tplErrorIs, ers[n].Ei, Errors().FilterUnknownMethod.Bind())
 			return
 		}
 	}
@@ -91,6 +107,12 @@ func TestParseFilterUnknownMethod(t *testing.T) {
 
 // Тестирование простой фильтрации - строгие и не строгие поля.
 func TestParseFilterField(t *testing.T) {
+	const (
+		tplErrorRequest = "Ошибка создания запроса: %s."
+		tplErrorFilter  = "ParseFilter() = %v, ошибка не ожидалась."
+		tplErrorCount   = "ParseFilter() = nil, ожидалось две ошибки."
+		tplErrorIs      = "ParseFilter() = %q, ожидалось: %q"
+	)
 	var (
 		err error
 		rq  *http.Request
@@ -105,10 +127,10 @@ func TestParseFilterField(t *testing.T) {
 		"GET",
 		"http://localhost?filter=aaa:eq:asc&filter=bbb:in:desc",
 		nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+		t.Errorf(tplErrorRequest, err)
 	}
 	if ers = obj.ParseFilter(rq); len(ers) > 0 {
-		t.Errorf("ParseFilter() = %v, ошибка не ожидалась.", ers)
+		t.Errorf(tplErrorFilter, ers)
 		return
 	}
 	// Строгие поля.
@@ -117,15 +139,15 @@ func TestParseFilterField(t *testing.T) {
 		"GET",
 		"http://localhost?filter=aaa:eq:asc&filter=bbb:in:desc&filter=id:in:1&filter=name:eq:desc",
 		nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+		t.Errorf(tplErrorRequest, err)
 	}
 	if ers = obj.ParseFilter(rq); len(ers) != 2 {
-		t.Errorf("ParseFilter() = nil, ожидалось две ошибки.")
+		t.Errorf(tplErrorCount)
 		return
 	}
 	for n = range ers {
 		if !Errors().FilterUnknownField.Is(ers[n].Ei) {
-			t.Errorf("ParseFilter() = %q, ожидалось: %q", ers[n].Ei, Errors().FilterUnknownField.Bind())
+			t.Errorf(tplErrorIs, ers[n].Ei, Errors().FilterUnknownField.Bind())
 			return
 		}
 	}
@@ -133,7 +155,13 @@ func TestParseFilterField(t *testing.T) {
 
 // Тестирование простой фильтрации - проверка значений и типов значений.
 func TestParseFilterValueAndType(t *testing.T) {
-	const expectedType = 5
+	const (
+		expectedType    = 5
+		tplErrorRequest = "Ошибка создания запроса: %s."
+		tplErrorFilter  = "ParseFilter() = %v, ошибка не ожидалась."
+		tplErrorTypes   = "Field = %d, ожидалось %d типов."
+		tplErrorCount   = "ParseFilter() = %d ошибок, ожидалось %d ошибок."
+	)
 	var (
 		err error
 		rq  *http.Request
@@ -155,10 +183,10 @@ func TestParseFilterValueAndType(t *testing.T) {
 		"http://localhost?filter=uint64:le:11&filter=int64:ge:-32&filter=float64:eq:42.3&filter=bool:eq:true"+
 			"&filter=time:ne:"+url.QueryEscape("2018-08-03T03:00:00+03:00"),
 		nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+		t.Errorf(tplErrorRequest, err)
 	}
 	if ers = obj.ParseFilter(rq); len(ers) > 0 {
-		t.Errorf("ParseFilter() = %v, ошибка не ожидалась.", ers)
+		t.Errorf(tplErrorFilter, ers)
 		return
 	}
 	for n = range obj.Filter {
@@ -186,7 +214,7 @@ func TestParseFilterValueAndType(t *testing.T) {
 		}
 	}
 	if nOk != expectedType {
-		t.Errorf("Field = %d, ожидалось %d типов.", nOk, expectedType)
+		t.Errorf(tplErrorTypes, nOk, expectedType)
 		return
 	}
 	if rq, err = http.NewRequest(
@@ -194,16 +222,22 @@ func TestParseFilterValueAndType(t *testing.T) {
 		"http://localhost?filter=uint64:le:-1&filter=int64:ge:-o2&filter=float64:eq:42,3&filter=bool:eq:no"+
 			"&filter=time:ne:"+url.QueryEscape("2018-08-03T03:00:00"),
 		nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+		t.Errorf(tplErrorRequest, err)
 	}
 	if ers = obj.ParseFilter(rq); len(ers) != expectedType {
-		t.Errorf("ParseFilter() = %d ошибок, ожидалось %d ошибок.", len(ers), expectedType)
+		t.Errorf(tplErrorCount, len(ers), expectedType)
 		return
 	}
 }
 
 // Тестирование простой фильтрации - проверка известных методов фильтрации.
 func TestParseFilterMethod(t *testing.T) {
+	const (
+		tplErrorRequest = "Ошибка создания запроса: %s."
+		tplErrorFilter  = "ParseFilter() = %v, ошибка не ожидалась."
+		tplErrorCount   = "[]Filter = %d, ожидалось %d."
+		tplErrorMethod  = "[]Filter.Method = %q, ожидалось %q."
+	)
 	var (
 		err     error
 		obj     *impl
@@ -222,18 +256,18 @@ func TestParseFilterMethod(t *testing.T) {
 			"GET",
 			"http://localhost?filter=a:"+methods[n].String()+":1234",
 			nil); err != nil {
-			t.Errorf("Ошибка создания запроса: %s", err)
+			t.Errorf(tplErrorRequest, err)
 		}
 		if ers = obj.ParseFilter(rq); len(ers) > 0 {
-			t.Errorf("ParseFilter() = %v, ошибка не ожидалась.", ers)
+			t.Errorf(tplErrorFilter, ers)
 			return
 		}
 		if len(obj.Filter) != 1 {
-			t.Errorf("[]Filter = %d, ожидалось %d.", len(obj.Filter), 1)
+			t.Errorf(tplErrorCount, len(obj.Filter), 1)
 			return
 		}
 		if obj.Filter[0].Method != methods[n] {
-			t.Errorf("[]Filter.Method = %q, ожидалось %q.", obj.Filter[0].Method.String(), methods[n].String())
+			t.Errorf(tplErrorMethod, obj.Filter[0].Method.String(), methods[n].String())
 			continue
 		}
 	}
@@ -241,6 +275,9 @@ func TestParseFilterMethod(t *testing.T) {
 
 // Тестирование простой фильтрации.
 func TestExportFilter(t *testing.T) {
+	const (
+		tplErrorExport = "exportFilter() вернул значения: %q = %v, ожидалось: %q, %v"
+	)
 	var (
 		obj *impl
 		key string
@@ -251,7 +288,7 @@ func TestExportFilter(t *testing.T) {
 	// Пустая фильтрация.
 	if key, val = obj.exportFilter(); key != "" || len(val) > 0 {
 		t.Errorf(
-			"exportFilter() вернул начения: %q = %v, ожидалось: %q, %v",
+			tplErrorExport,
 			key, val,
 			"", []string{},
 		)
@@ -264,7 +301,7 @@ func TestExportFilter(t *testing.T) {
 	}
 	if key, val = obj.exportFilter(); key != keyFilter || !reflect.DeepEqual(val, []string{"id:ge:7", "di:ne:1"}) {
 		t.Errorf(
-			"exportFilter() вернул начения: %q = %v, ожидалось: %q, %v",
+			tplErrorExport,
 			key, val,
 			keyFilter, []string{"id:ge:7", "di:ne:1"},
 		)
