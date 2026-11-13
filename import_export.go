@@ -78,7 +78,8 @@ func (f8n *impl) String() (ret string) {
 			}
 			_, _ = b.WriteString(keys[n])
 			_ = b.WriteByte('=')
-			_, _ = b.WriteString(vals[j])
+			// Экранирование значения, для корректного повторного разбора строки запроса.
+			_, _ = b.WriteString(url.QueryEscape(vals[j]))
 		}
 	}
 	ret = b.String()

@@ -1,6 +1,7 @@
 package f8n
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -22,6 +23,7 @@ func TestAnalysis(t *testing.T) {
 		tplErrorRequest = "Ошибка создания запроса: %s."
 		tplErrorEmpty   = "ParseRequest() == nil, ожидалась ошибка."
 		tplErrorIs      = "ParseRequest() = %q, ожидалось: %q"
+		tplCaseName     = "case-%d"
 	)
 	var (
 		err   error
@@ -99,18 +101,22 @@ func TestAnalysis(t *testing.T) {
 		},
 	}
 	for n = range tests {
-		obj.Reset()
-		if rq, err = http.NewRequest("GET", strings.ReplaceAll(tests[n].Data, "\n", ""), nil); err != nil {
-			t.Errorf(tplErrorRequest, err)
-		}
-		if err = obj.ParseRequest(rq); err == nil {
-			t.Logf("данные: %s", tests[n].Data)
-			t.Errorf(tplErrorEmpty)
-			return
-		}
-		if !tests[n].Error.Is(err) {
-			t.Logf("данные: %s", tests[n].Data)
-			t.Errorf(tplErrorIs, err, tests[n].Error.Bind())
+		if !t.Run(fmt.Sprintf(tplCaseName, n), func(t *testing.T) {
+			obj.Reset()
+			if rq, err = http.NewRequest("GET", strings.ReplaceAll(tests[n].Data, "\n", ""), nil); err != nil {
+				t.Errorf(tplErrorRequest, err)
+			}
+			if err = obj.ParseRequest(rq); err == nil {
+				t.Logf("данные: %s", tests[n].Data)
+				t.Errorf(tplErrorEmpty)
+				return
+			}
+			if !tests[n].Error.Is(err) {
+				t.Logf("данные: %s", tests[n].Data)
+				t.Errorf(tplErrorIs, err, tests[n].Error.Bind())
+				return
+			}
+		}) {
 			return
 		}
 	}

@@ -13,6 +13,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 	var (
 		ero      *ParseError
 		src, tmp []string
+		srcOK    []string
 		n, j     int
 		dir      ByDirection
 		found    bool
@@ -45,6 +46,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 			continue
 		}
 		f8n.By = append(f8n.By, Direction{Field: tmp[0], By: dir})
+		srcOK = append(srcOK, src[n])
 	}
 	// Если заданы поля, проверка имени поля сортировки.
 	if len(f8n.FieldOnly) > 0 {
@@ -59,7 +61,7 @@ func (f8n *impl) ParseBy(rq *http.Request) (ret []*ParseError) {
 				ero = &ParseError{Ei: f8n.Errors().ByDirectionField.Bind(f8n.By[n].Field)}
 				ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 					Field:      keyBy,
-					FieldValue: src[n],
+					FieldValue: srcOK[n],
 					Message:    ero.Ei.Error(),
 				})
 				ret = append(ret, ero)

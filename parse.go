@@ -19,6 +19,7 @@ func (f8n *impl) ParseRequest(rq *http.Request, errorFn ...OnErrorFunc) (err err
 		ers  []*ParseError
 		tmp  []*ParseError
 		buf  *bytes.Buffer
+		jerr error
 		n, j int
 	)
 
@@ -72,9 +73,11 @@ func (f8n *impl) ParseRequest(rq *http.Request, errorFn ...OnErrorFunc) (err err
 			rei.AddWithKey(ers[n].Ev[j].Field, ers[n].Ev[j].FieldValue, ers[n].Ev[j].Message, ers[n].Ev[j].I18nKey)
 		}
 	}
-	buf, _ = rei.JsonBytes()
-	for n = range errorFn {
-		errorFn[n](buf.Bytes(), err)
+	// Ошибка сериализации описания ошибок маловероятна, при ошибке в функцию errorFn данные не передаются.
+	if buf, jerr = rei.JsonBytes(); jerr == nil {
+		for n = range errorFn {
+			errorFn[n](buf.Bytes(), err)
+		}
 	}
 
 	return

@@ -224,6 +224,27 @@ func TestFilterQueryGorm(t *testing.T) {
 			Filter: Filter{Field: "f", Method: filterUnknown, Value: FilterValue{Source: "v", Type: TypeString}},
 			Query:  "Метод sql запроса `` не реализован.",
 		},
+		// Равно, новый тип допускающий NULL, значение nil.
+		{
+			Name:   "eq-uuid-nil",
+			Filter: Filter{Field: "f", Method: filterEquivalent, Value: FilterValue{Source: "nil", Type: TypeUUIDNil}},
+			Query:  " IS NULL",
+		},
+		// Равно, новый тип допускающий NULL, значение не nil.
+		{
+			Name: "eq-uuid-nil-type",
+			Filter: Filter{Field: "f", Method: filterEquivalent, Value: FilterValue{
+				Source: "550e8400-e29b-41d4-a716-446655440000", Type: TypeUUIDNil,
+			}},
+			Query:  " = ?",
+			Values: []any{"550e8400-e29b-41d4-a716-446655440000"},
+		},
+		// Меньше, новый тип допускающий NULL, значение nil - условие не формируется.
+		{
+			Name:   "lt-duration-nil",
+			Filter: Filter{Field: "f", Method: filterLessThan, Value: FilterValue{Source: "nil", Type: TypeDurationNil}},
+			Query:  "",
+		},
 	}
 	for n = range tests {
 		var (

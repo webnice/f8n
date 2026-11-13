@@ -10,27 +10,37 @@ import (
 
 // CleanNameField Очистка названия полей от возможных не корректных символов.
 func (f8n *impl) CleanNameField() {
-	var (
-		badWord []string
-		n, j    int
-	)
+	var n int
 
-	badWord = []string{"`", "'", `"`, ","}
 	for n = range f8n.FieldOnly {
-		for j = range badWord {
-			f8n.FieldOnly[n] = strings.ReplaceAll(f8n.FieldOnly[n], badWord[j], "")
-		}
+		f8n.FieldOnly[n] = cleanNameField(f8n.FieldOnly[n])
+	}
+
+	return
+}
+
+// Очистка названия поля от символов опасных при формировании SQL запроса.
+// Удаляются символы: ` ' " , - позволяющие выйти за пределы идентификатора поля.
+func cleanNameField(name string) (ret string) {
+	const dangerous = "`'\","
+	var n int
+
+	ret = name
+	for n = 0; n < len(dangerous); n++ {
+		ret = strings.ReplaceAll(ret, dangerous[n:n+1], "")
 	}
 
 	return
 }
 
 // Выполнение замены наименования поля базы данных.
+// Название поля очищается от символов опасных при формировании SQL запроса.
+// Название полученное из переопределения полей используется без изменений, является доверенным вводом приложения.
 func (f8n *impl) fieldName(name string) (ret string) {
 	var ok bool
 
 	if ret, ok = f8n.Remap[name]; !ok {
-		ret = fmt.Sprintf("`%s`", name)
+		ret = fmt.Sprintf("`%s`", cleanNameField(name))
 	}
 
 	return

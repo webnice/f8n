@@ -26,6 +26,7 @@ const (
 	eNoLogicalOperationBetweenBrackets                  // 020
 	eFilterCalledByNameWasNotFound                      // 021
 	eOrmIsNil                                           // 022
+	eSqlNotImplemented                                  // 023
 )
 
 // Константы ошибок.
@@ -52,6 +53,7 @@ const (
 	cNoLogicalOperationBetweenBrackets = "Необходимо указать логическую операцию между операторных скобок."
 	cFilterCalledByNameWasNotFound     = "Значение фильтра с названием %q не было найдено в запросе."
 	cOrmIsNil                          = "Передан ORM объект являющейся nil. Ожидался не nil объект."
+	cSqlNotImplemented                 = "Формирование SQL запроса для диалекта %q не реализовано."
 )
 
 // Error Структура справочника ошибок.
@@ -124,6 +126,9 @@ type Error struct {
 
 	// OrmIsNil Передан ORM объект являющейся nil. Ожидался не nil объект.
 	OrmIsNil dic.IError
+
+	// SqlNotImplemented Формирование SQL запроса для диалекта ... не реализовано.
+	SqlNotImplemented dic.IError
 }
 
 var errSingleton = &Error{
@@ -150,6 +155,7 @@ var errSingleton = &Error{
 	NoLogicalOperationBetweenBrackets: dic.NewError(cNoLogicalOperationBetweenBrackets).CodeU8().Set(eNoLogicalOperationBetweenBrackets),
 	FilterCalledByNameWasNotFound:     dic.NewError(cFilterCalledByNameWasNotFound, "название").CodeU8().Set(eFilterCalledByNameWasNotFound),
 	OrmIsNil:                          dic.NewError(cOrmIsNil).CodeU8().Set(eOrmIsNil),
+	SqlNotImplemented:                 dic.NewError(cSqlNotImplemented, "диалект").CodeU8().Set(eSqlNotImplemented),
 }
 
 // Errors Справочник ошибок.

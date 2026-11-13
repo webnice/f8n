@@ -23,7 +23,11 @@ func (f8n *impl) GormSepFilter(orm *gorm.DB) (ret *gorm.DB, filter *gorm.DB, err
 		sqlAsc  = " ASC"
 		sqlDesc = " DESC"
 	)
-	var n int
+	var (
+		n         int
+		mapQuery  string
+		mapValues []any
+	)
 
 	if orm == nil {
 		err = f8n.Errors().OrmIsNil.Bind()
@@ -33,7 +37,12 @@ func (f8n *impl) GormSepFilter(orm *gorm.DB) (ret *gorm.DB, filter *gorm.DB, err
 	// Создание фильтров простой фильтрации.
 	filter = f8n.gormFilter(orm)
 	// Создание фильтров сложной фильтрации.
-	// TODO: Добавить фильтры сложной фильтрации.
+	// Условия группируются в скобки, для корректного объединения с условиями простой фильтрации по логическому «И».
+	if f8n.Map != nil {
+		if mapQuery, mapValues = f8n.Map.queryGorm(); mapQuery != "" {
+			orm = orm.Where("("+mapQuery+")", mapValues...)
+		}
+	}
 	// Добавление сортировки.
 	for n = range f8n.By {
 		switch f8n.By[n].By {

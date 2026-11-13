@@ -379,8 +379,8 @@ func TestReset(t *testing.T) {
 		t.Errorf(tplErrorMap)
 		return
 	}
-	if obj.Map.SumSize() != 100 {
-		t.Errorf(tplErrorMapSize, obj.Map.SumSize(), 100)
+	if obj.Map.SumSize() != 99 {
+		t.Errorf(tplErrorMapSize, obj.Map.SumSize(), 99)
 		return
 	}
 	if len(obj.Remap) == 0 {

@@ -74,6 +74,70 @@ func (mp *Map) SumSize() (ret int) {
 	return mp.Size + size
 }
 
+// Формирование SQL запроса и параметров для ORM GORM из DOM дерева карты сложной фильтрации.
+// Рендеринг выполняется рекурсивно по всем подчинённым узлам, в порядке следования узлов.
+// Операторные скобки рендерятся в группы условий заключённые в круглые скобки.
+func (mp *Map) queryGorm() (query string, values []any) {
+	const (
+		sqlAnd = " AND "
+		sqlOr  = " OR "
+	)
+	var (
+		b   strings.Builder
+		n   int
+		q   string
+		v   []any
+		sep string
+	)
+
+	for n = range mp.Node {
+		switch mp.Node[n].Origin {
+		case OriginAnd:
+			// Отложенный разделитель, применяется только если с двух сторон есть операнды.
+			sep = sqlAnd
+		case OriginOr:
+			sep = sqlOr
+		case OriginFiltration:
+			// Фильтрация без разобранного фильтра пропускается.
+			if mp.Node[n].Filter == nil {
+				continue
+			}
+			q, v = mp.Node[n].Filter.queryGorm()
+			if b.Len() > 0 && sep != "" {
+				_, _ = b.WriteString(sep)
+			}
+			sep = ""
+			_, _ = b.WriteString(mp.parent.fieldName(mp.Node[n].Filter.Field))
+			_, _ = b.WriteString(q)
+			values = append(values, v...)
+		case OriginOperatorBracket:
+			q, v = mp.Node[n].queryGorm()
+			// Пустая группа условий пропускается.
+			if q == "" {
+				continue
+			}
+			if b.Len() > 0 && sep != "" {
+				_, _ = b.WriteString(sep)
+			}
+			sep = ""
+			_, _ = b.WriteString(pairBeg)
+			_, _ = b.WriteString(q)
+			_, _ = b.WriteString(pairEnd)
+			values = append(values, v...)
+		}
+	}
+	// Узел фильтрации без подчинённых узлов, единственный узел карты.
+	if len(mp.Node) == 0 && mp.Origin == OriginFiltration && mp.Filter != nil {
+		q, v = mp.Filter.queryGorm()
+		_, _ = b.WriteString(mp.parent.fieldName(mp.Filter.Field))
+		_, _ = b.WriteString(q)
+		values = append(values, v...)
+	}
+	query = b.String()
+
+	return
+}
+
 // IsEmpty Возвращает истину если узел карты пустой - не является тегом и не содержит подчинённых узлов.
 func (mp *Map) IsEmpty() bool {
 	return mp.TagBegin == "" && mp.TagEnd == "" && mp.Content == "" && len(mp.Node) == 0
@@ -125,8 +189,9 @@ func (mp *Map) LoadAndParseFilter(rq *http.Request) (ret []*ParseError) {
 			})
 			ret, filters = append(ret, ero), filters[:0]
 		}
+		// При повторной передаче фильтра с одним именем используется первое значение.
 		if len(filters) > 0 {
-			tmp = strings.Join(filters, keyAnd)
+			tmp = filters[0]
 			if filter, errs = mp.parent.parseFilterSimple(tmp); len(errs) == 0 {
 				mp.Filter = &filter
 			}

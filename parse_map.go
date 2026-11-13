@@ -1,53 +1,92 @@
 package f8n
 
 import (
-	"bytes"
-	"fmt"
 	"net/http"
 	"net/url"
 )
 
 // ParseMap Загрузка и разбор карты условий сложной фильтрации.
+// Если передано несколько не пустых параметров map, тогда DOM деревья условий объединяются
+// по принципу логического «ИЛИ», каждое дерево является операндом логической операции.
 func (f8n *impl) ParseMap(rq *http.Request) (ret []*ParseError) {
-	const tpl1, tpl2 = "(%s)", keyAnd + "(%s)"
 	var (
-		values   url.Values
 		mapValue []string
-		buf      *bytes.Buffer
+		parts    []*Map
+		root     *Map
+		part     *Map
+		operand  *Map
+		ers      []*ParseError
 		n, j     int
-		tpl, tmp string
 	)
 
-	values = rq.URL.Query()
-	mapValue = values[keyMap]
-	switch len(mapValue) {
+	if mapValue = rq.URL.Query()[keyMap]; len(mapValue) == 0 {
+		return
+	}
+	// Разбор каждого не пустого параметра map в отдельное DOM дерево условий.
+	for n = range mapValue {
+		if len(mapValue[n]) == 0 {
+			continue
+		}
+		part = f8n.parseMap([]byte(mapValue[n]), 0)
+		// Анализ корректности разбора части.
+		if ers = part.Analysis(); len(ers) > 0 {
+			// Подстановка разбираемого значения в описание ошибок.
+			for j = range ers {
+				for n = range ers[j].Ev {
+					if ers[j].Ev[n].FieldValue == "" {
+						ers[j].Ev[n].FieldValue = mapValue[n]
+					}
+				}
+			}
+			ret = append(ret, ers...)
+			continue
+		}
+		parts = append(parts, part)
+	}
+	// Единственное дерево условий используется без объединения.
+	switch len(parts) {
 	case 0:
 		return
 	case 1:
-		if len(mapValue[0]) == 0 {
-			return
-		}
-		buf = bytes.NewBufferString(mapValue[0])
+		f8n.Map = parts[0]
 	default:
-		buf = &bytes.Buffer{}
-		for n = range mapValue {
-			if tpl = tpl1; n > 0 {
-				tpl = tpl2
-			}
-			_, _ = buf.WriteString(fmt.Sprintf(tpl, mapValue[n]))
-		}
-	}
-	f8n.Map = f8n.parseMap(buf.Bytes(), 0)
-	// Анализ корректности разбора.
-	if ret = f8n.Map.Analysis(); len(ret) > 0 {
-		tmp = buf.String()
-		for n = range ret {
-			for j = range ret[n].Ev {
-				if ret[n].Ev[j].FieldValue == "" {
-					ret[n].Ev[j].FieldValue = tmp
+		// Объединение деревьев условий по принципу логического «ИЛИ».
+		root = &Map{parent: f8n}
+		for n = range parts {
+			part = parts[n]
+			switch {
+			case len(part.Node) == 0:
+				// Корень фильтрации без подчинённых узлов, является операндом логической операции.
+				operand = part
+			case len(part.Node) == 1:
+				// Единственный узел дерева является операндом логической операции.
+				operand = part.Node[0]
+			default:
+				// Условия дерева группируются в операторные скобки, группа является операндом логической операции.
+				operand = &Map{
+					parent:   f8n,
+					TagBegin: pairBeg,
+					TagEnd:   pairEnd,
+					Origin:   OriginOperatorBracket,
+					Node:     part.Node,
+					Size:     len(pairBeg) + len(pairEnd),
 				}
 			}
+			// Операнды объединяются логической операцией «ИЛИ».
+			if len(root.Node) > 0 {
+				root.Node = append(root.Node, &Map{
+					parent:   f8n,
+					TagBegin: keyOr,
+					TagEnd:   keyOr,
+					Origin:   OriginOr,
+					Size:     len(keyOr),
+				})
+			}
+			root.Node = append(root.Node, operand)
 		}
+		f8n.Map = root
+	}
+	if len(ret) > 0 {
 		return
 	}
 	// Рекурсивное копирование фильтров из запроса в DOM объект, а так же разбор фильтров в соответствии с синтаксисом.

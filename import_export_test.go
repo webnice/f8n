@@ -66,8 +66,8 @@ func testData2(_ *testing.T) string {
 		`ximately","method":"ge","value":{"source":"1.1","type":"float64"}},"size":2,"node":null},{"beg":":and:","en` +
 		`d":":and:","origin":":and:","content":"","filter":null,"size":5,"node":null},{"beg":"","end":"","origin":"f` +
 		`iltration","content":"f3","filter":{"field":"is_done","method":"eq","value":{"source":"true","type":"bool"}` +
-		`},"size":2,"node":null}]}]},{"beg":":and:","end":":and:","origin":":and:","content":"","filter":null,"size"` +
-		`:5,"node":null},{"beg":"(","end":")","origin":"operator_bracket","content":"","filter":null,"size":2,"node"` +
+		`},"size":2,"node":null}]}]},{"beg":":or:","end":":or:","origin":":or:","content":"","filter":null,"size"` +
+		`:4,"node":null},{"beg":"(","end":")","origin":"operator_bracket","content":"","filter":null,"size":2,"node"` +
 		`:[{"beg":"","end":"","origin":"filtration","content":"f3","filter":{"field":"is_done","method":"eq","value"` +
 		`:{"source":"true","type":"bool"}},"size":2,"node":null},{"beg":":and:","end":":and:","origin":":and:","cont` +
 		`ent":"","filter":null,"size":5,"node":null},{"beg":"","end":"","origin":"filtration","content":"f4","filter` +
@@ -97,7 +97,7 @@ func makeTestContent[T testContentModel](t *testing.T, dataID int, data T) (ret 
 		case 2:
 			ret = any(testData2(t)).(T)
 		case 3:
-			ret = any("(f1:or:f2:or:(f5:and:f3)):and:(f3:and:f4)").(T)
+			ret = any("(f1:or:f2:or:(f5:and:f3)):or:(f3:and:f4)").(T)
 		default:
 			t.Errorf(tplErrorDataID)
 		}
@@ -427,6 +427,44 @@ func TestImportStringWithError(t *testing.T) {
 	obj = New()
 	if err = obj.ImportString(datBadString); err == nil {
 		t.Errorf(tplErrorEmpty)
+		return
+	}
+}
+
+// Тестирование экранирования специальных символов при экспорте и импорте строки запроса.
+func TestStringSpecialCharacters(t *testing.T) {
+	const (
+		datUrn          = `http://localhost?filter=name:eq:a%26b%3Dc%2Bd`
+		tplErrorRequest = "Ошибка создания запроса: %s."
+		tplErrorParse   = "ParseRequest() != nil, ошибка не ожидалась. Ошибка: %s"
+		tplErrorImport  = "ImportString() != nil, ошибка не ожидалась. Ошибка: %s"
+		tplErrorValue   = "Filter[0].Value.Source = %q, ожидалось: %q."
+		datWant         = "a&b=c+d"
+	)
+	var (
+		err error
+		rq  *http.Request
+		obj Interface
+		tmp *impl
+	)
+
+	// Разбор запроса со значениями содержащими символы &, =, +.
+	if rq, err = http.NewRequest("GET", datUrn, nil); err != nil {
+		t.Errorf(tplErrorRequest, err)
+	}
+	obj = New()
+	if err = obj.ParseRequest(rq); err != nil {
+		t.Errorf(tplErrorParse, err)
+		return
+	}
+	// Экспорт в строку и повторный импорт, значение должно сохраниться без искажений.
+	if err = obj.ImportString(obj.String()); err != nil {
+		t.Errorf(tplErrorImport, err)
+		return
+	}
+	tmp = obj.(*impl)
+	if len(tmp.Filter) != 1 || tmp.Filter[0].Value.Source != datWant {
+		t.Errorf(tplErrorValue, tmp.Filter[0].Value.Source, datWant)
 		return
 	}
 }
