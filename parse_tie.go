@@ -11,6 +11,10 @@ import (
 // ParseTie Загрузка устаревшего режима фильтрации - tie.
 // Режим tie не совместим с map.
 func (f8n *impl) ParseTie(rq *http.Request) (ret []*ParseError) {
+	const (
+		sepJoin            = ", "
+		tplTieInvalidValue = "допустимые значения: %q или %q"
+	)
 	var (
 		err   error
 		ero   *ParseError
@@ -21,8 +25,8 @@ func (f8n *impl) ParseTie(rq *http.Request) (ret []*ParseError) {
 	if modes = rq.URL.Query()[keyTie]; len(modes) > 1 {
 		ero = &ParseError{Ei: f8n.Errors().TieModeThanOne.Bind()}
 		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
-			Field:      keyLimit,
-			FieldValue: strings.Join(modes, ", "),
+			Field:      keyTie,
+			FieldValue: strings.Join(modes, sepJoin),
 			Message:    ero.Ei.Error(),
 		})
 		ret = append(ret, ero)
@@ -31,11 +35,12 @@ func (f8n *impl) ParseTie(rq *http.Request) (ret []*ParseError) {
 	if len(modes) <= 0 {
 		return
 	}
+	// Разбор режима фильтрации.
 	switch tie = parseTie(modes[0]); tie {
 	case tieAnd, tieOr:
 		f8n.Tie = tie
 	default:
-		err = fmt.Errorf("допустимые значения: %q или %q", tieAnd, tieOr)
+		err = fmt.Errorf(tplTieInvalidValue, tieAnd, tieOr)
 		ero = &ParseError{Ei: Errors().TieModeInvalidValue.Bind(modes[0], err)}
 		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyTie,

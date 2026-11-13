@@ -80,7 +80,6 @@ func (f8n *impl) String() (ret string) {
 			_ = b.WriteByte('=')
 			_, _ = b.WriteString(vals[j])
 		}
-
 	}
 	ret = b.String()
 
@@ -137,7 +136,11 @@ func (f8n *impl) Query() (ret url.Values) {
 // Строка запроса может быть строкой ранее полученной через вызов функции String(), либо строкой полученной
 // из параметров URN запроса.
 func (f8n *impl) ImportString(s string) (err error) {
-	const localhost = `http://localhost`
+	const (
+		methodGet          = "GET"
+		localhost          = `http://localhost`
+		tplImportWithError = "импорт строки: %q, прерван ошибкой: %s"
+	)
 	var (
 		sb strings.Builder
 		rq *http.Request
@@ -148,8 +151,8 @@ func (f8n *impl) ImportString(s string) (err error) {
 		_ = sb.WriteByte('?')
 		_, _ = sb.WriteString(s)
 	}
-	if rq, err = http.NewRequest("GET", sb.String(), nil); err != nil {
-		err = fmt.Errorf("импорт строки: %q, прерван ошибкой: %s", s, err)
+	if rq, err = http.NewRequest(methodGet, sb.String(), nil); err != nil {
+		err = fmt.Errorf(tplImportWithError, s, err)
 		return
 	}
 	// Сброс только тех значений которые экспортируются через функцию String()

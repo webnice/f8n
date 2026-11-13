@@ -15,7 +15,9 @@ func (f8n *impl) analysis(node *Map) (ret []*ParseError) {
 
 	// Функция сборки ошибки.
 	fxp = func(r []*ParseError, e error) []*ParseError {
-		var eo = &ParseError{Ei: e}
+		var eo *ParseError
+
+		eo = &ParseError{Ei: e}
 		eo.Ev = append(eo.Ev, kitModuleAns.RestErrorField{
 			Field:   keyFilter,
 			Message: eo.Ei.Error(),

@@ -10,6 +10,7 @@ import (
 
 // ParseLimit Загрузка лимита.
 func (f8n *impl) ParseLimit(rq *http.Request) (ret []*ParseError) {
+	const sepJoin = ", "
 	var (
 		ero        *ParseError
 		src        []string
@@ -21,7 +22,7 @@ func (f8n *impl) ParseLimit(rq *http.Request) (ret []*ParseError) {
 		ero = &ParseError{Ei: f8n.Errors().LimitReceivedMoreThanOne.Bind()}
 		ero.Ev = append(ero.Ev, kitModuleAns.RestErrorField{
 			Field:      keyLimit,
-			FieldValue: strings.Join(src, ", "),
+			FieldValue: strings.Join(src, sepJoin),
 			Message:    ero.Ei.Error(),
 		})
 		ret = append(ret, ero)

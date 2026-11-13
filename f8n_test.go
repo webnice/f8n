@@ -5,7 +5,15 @@ import (
 	"testing"
 )
 
+// Тестирование информации о наличии фильтрации в запросе.
 func TestImpl_IsFiltration(t *testing.T) {
+	const (
+		methodGet          = "GET"
+		datUrn             = "http://localhost?limit=0:10&filter=domain:ke:*wd*"
+		tplErrorRequest    = "Ошибка создания запроса: %s."
+		tplErrorParse      = "ParseFilter() ошибок: %d, ошибка не ожидалась."
+		tplErrorFilterTrue = "IsFiltration() = %t, ожидалось: %t."
+	)
 	var (
 		err error
 		rq  *http.Request
@@ -14,20 +22,20 @@ func TestImpl_IsFiltration(t *testing.T) {
 		ok  bool
 	)
 
-	if rq, err = http.NewRequest("GET", "http://localhost?limit=0:10&filter=domain:ke:*wd*", nil); err != nil {
-		t.Errorf("Ошибка создания запроса: %s", err)
+	if rq, err = http.NewRequest(methodGet, datUrn, nil); err != nil {
+		t.Errorf(tplErrorRequest, err)
 	}
 	obj = New().(*impl)
 	if ok = obj.IsFiltration(); ok {
-		t.Errorf("IsFiltration() = %t, ожидалось: %t.", ok, false)
+		t.Errorf(tplErrorFilterTrue, ok, false)
 		return
 	}
 	if ers = obj.ParseFilter(rq); len(ers) != 0 {
-		t.Errorf("ParseFilter() ошибок: %d, ошибка не ожидалась.", len(ers))
+		t.Errorf(tplErrorParse, len(ers))
 		return
 	}
 	if ok = obj.IsFiltration(); !ok {
-		t.Errorf("IsFiltration() = %t, ожидалось: %t.", ok, true)
+		t.Errorf(tplErrorFilterTrue, ok, true)
 		return
 	}
 }

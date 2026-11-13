@@ -28,6 +28,7 @@ func (f8n *impl) ParseRequest(rq *http.Request, errorFn ...OnErrorFunc) (err err
 			err = f8n.Errors().Panic.Bind(e, runtimeDebug.Stack())
 		}
 	}()
+	// Проверка входящих данных.
 	if rq == nil {
 		err = f8n.Errors().RequestIsNil.Bind()
 		return

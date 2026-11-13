@@ -12,6 +12,16 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	tplConnectError = "Ошибка подключения к тестовой базе данных: %v."
+	tplPingError    = "Ошибка проверки соединения с тестовой базой данных: %v."
+	tplDropError    = "Ошибка удаления таблицы, ошибка: %v."
+	tplMigrateError = "Ошибка автоматической миграции, ошибка: %v."
+	tplTableError   = "Ошибка создания таблицы для %#v."
+	tplTestDatabase = "тестирование sqlite3"
+	pragForeignKeys = "PRAGMA foreign_keys = ON"
+)
+
 func init() {
 	var (
 		err   error
@@ -19,28 +29,29 @@ func init() {
 	)
 
 	if DB, err = OpenTestConnection(&gorm.Config{}); err != nil {
-		log.Printf("failed to connect database, got error %v", err)
+		log.Printf(tplConnectError, err)
 		os.Exit(1)
-	} else {
-		if sqlDB, err = DB.DB(); err != nil {
-			log.Printf("failed to connect database, got error %v", err)
+	}
+	if sqlDB, err = DB.DB(); err != nil {
+		log.Printf(tplConnectError, err)
+		os.Exit(1)
+	}
+	if err = sqlDB.Ping(); err != nil {
+		log.Printf(tplPingError, err)
+		os.Exit(1)
+	}
+	Migrations()
+	if DB.Dialector.Name() == "sqlite" {
+		if err = DB.Exec(pragForeignKeys).Error; err != nil {
+			log.Printf(tplConnectError, err)
 			os.Exit(1)
-		}
-		err = sqlDB.Ping()
-		if err != nil {
-			log.Printf("failed to ping sqlDB, got error %v", err)
-			os.Exit(1)
-		}
-		Migrations()
-		if DB.Dialector.Name() == "sqlite" {
-			DB.Exec("PRAGMA foreign_keys = ON")
 		}
 	}
 }
 
 // OpenTestConnection Открытие тестового соединения с тестовой базой данных.
 func OpenTestConnection(cfg *gorm.Config) (db *gorm.DB, err error) {
-	log.Println("testing sqlite3")
+	log.Println(tplTestDatabase)
 	if db, err = gorm.Open(sqlite.Open(filepath.Join(os.TempDir(), "gorm.db")), cfg); err != nil {
 		return
 	}
@@ -48,27 +59,29 @@ func OpenTestConnection(cfg *gorm.Config) (db *gorm.DB, err error) {
 	return
 }
 
+// Migrations Пересоздание таблиц тестовой базы данных.
 func Migrations() {
 	var err error
 
+	// Случайный порядок миграций моделей, для выявления скрытых зависимостей между таблицами.
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	allModels := []any{&Parent{}, &Child{}}
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(allModels), func(i, j int) { allModels[i], allModels[j] = allModels[j], allModels[i] })
+	rnd.Shuffle(len(allModels), func(i int, j int) { allModels[i], allModels[j] = allModels[j], allModels[i] })
 	if err = DB.Migrator().DropTable("user_friends", "user_speaks"); err != nil {
-		log.Printf("Failed to drop table, got error %v\n", err)
+		log.Printf(tplDropError, err)
 		os.Exit(1)
 	}
 	if err = DB.Migrator().DropTable(allModels...); err != nil {
-		log.Printf("Failed to drop table, got error %v\n", err)
+		log.Printf(tplDropError, err)
 		os.Exit(1)
 	}
 	if err = DB.AutoMigrate(allModels...); err != nil {
-		log.Printf("Failed to auto migrate, but got error %v\n", err)
+		log.Printf(tplMigrateError, err)
 		os.Exit(1)
 	}
 	for _, m := range allModels {
 		if !DB.Migrator().HasTable(m) {
-			log.Printf("Failed to create table for %#v\n", m)
+			log.Printf(tplTableError, m)
 			os.Exit(1)
 		}
 	}

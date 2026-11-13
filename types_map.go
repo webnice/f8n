@@ -38,10 +38,12 @@ func (origin Origin) String() string { return string(origin) }
 
 // Экспорт значения настроек сортировки.
 func (direction Direction) exportAsString() (ret string) {
+	const tplDirection = "%s%s%s"
+
 	if direction.Field == "" {
 		return
 	}
-	ret = fmt.Sprintf("%s%s%s", direction.Field, keyDelimiter, direction.By.String())
+	ret = fmt.Sprintf(tplDirection, direction.Field, keyDelimiter, direction.By.String())
 
 	return
 }
@@ -89,6 +91,7 @@ func (mp *Map) Analysis() (ret []*ParseError) {
 			ret = append(ret, tmp...)
 		}
 	}
+	// Анализ текущего узла.
 	if tmp = mp.parent.analysis(mp); len(tmp) > 0 {
 		ret = append(ret, tmp...)
 	}

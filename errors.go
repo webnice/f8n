@@ -46,7 +46,7 @@ const (
 	cFilterUnknownField                = "Указана фильтрация по не известному полю %q."
 	cFilterValueType                   = "Указано значение %q не соответствующее типу %q, ошибка: %s."
 	cPairedTagNotMatch                 = "Открывающий тег %q не соответствует закрывающему тегу %q."
-	cWrongLogicalOperation             = "Не верная логическая операция %q"
+	cWrongLogicalOperation             = "Не верная логическая операция %q."
 	cOperatorBracketEmpty              = "Указаны пустые операторные скобки."
 	cOperatorBracketOneItem            = "В операторные скобки заключён один элемент, уберите операторные скобки."
 	cNoLogicalOperationBetweenBrackets = "Необходимо указать логическую операцию между операторных скобок."
@@ -58,7 +58,7 @@ const (
 type Error struct {
 	dic.Errors
 
-	// Panic Восстановление после паники. ...
+	// Panic Восстановление после паники.
 	Panic dic.IError
 
 	// RequestIsNil Передан http.Request равный nil.

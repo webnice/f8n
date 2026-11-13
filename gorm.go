@@ -11,7 +11,7 @@ func (f8n *impl) Gorm(orm *gorm.DB) (ret *gorm.DB, err error) {
 	}
 	// Объединение с фильтрами.
 	if len(f8n.Filter) > 0 {
-		ret = orm.Where(filter)
+		ret = ret.Where(filter)
 	}
 
 	return
@@ -19,6 +19,10 @@ func (f8n *impl) Gorm(orm *gorm.DB) (ret *gorm.DB, err error) {
 
 // GormSepFilter Добавление в ORM всех разобранных значений и возвращение фильтрации отдельным объектом.
 func (f8n *impl) GormSepFilter(orm *gorm.DB) (ret *gorm.DB, filter *gorm.DB, err error) {
+	const (
+		sqlAsc  = " ASC"
+		sqlDesc = " DESC"
+	)
 	var n int
 
 	if orm == nil {
@@ -29,18 +33,14 @@ func (f8n *impl) GormSepFilter(orm *gorm.DB) (ret *gorm.DB, filter *gorm.DB, err
 	// Создание фильтров простой фильтрации.
 	filter = f8n.gormFilter(orm)
 	// Создание фильтров сложной фильтрации.
-
 	// TODO: Добавить фильтры сложной фильтрации.
-
-	//
-
 	// Добавление сортировки.
 	for n = range f8n.By {
 		switch f8n.By[n].By {
 		case byAsc:
-			orm = orm.Order(f8n.fieldName(f8n.By[n].Field) + " ASC")
+			orm = orm.Order(f8n.fieldName(f8n.By[n].Field) + sqlAsc)
 		case byDesc:
-			orm = orm.Order(f8n.fieldName(f8n.By[n].Field) + " DESC")
+			orm = orm.Order(f8n.fieldName(f8n.By[n].Field) + sqlDesc)
 		}
 	}
 	// Добавление лимитов.
@@ -56,7 +56,6 @@ func (f8n *impl) GormSepFilter(orm *gorm.DB) (ret *gorm.DB, filter *gorm.DB, err
 
 // Добавление фильтров простой фильтрации.
 func (f8n *impl) gormFilter(orm *gorm.DB) (filter *gorm.DB) {
-	const keyInstance = "original-orm-object"
 	var (
 		n    int
 		t, q string

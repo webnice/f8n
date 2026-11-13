@@ -28,7 +28,7 @@ func (fvo FilterValue) IsValueNil() (ret bool) {
 	return
 }
 
-// Value Возвращения значения в типе указанном у значения.
+// Value Возвращение значения в типе указанном у значения.
 func (fvo FilterValue) Value() (ret any) {
 	var err error
 
@@ -76,6 +76,7 @@ func (fvo FilterValue) SliceString() (ret []string, err error) {
 
 // SliceInt64 Представления значения в виде среза int64.
 func (fvo FilterValue) SliceInt64() (ret []int64, err error) {
+	const typeInt64Name = "int64"
 	var (
 		n   int
 		str []string
@@ -87,7 +88,7 @@ func (fvo FilterValue) SliceInt64() (ret []int64, err error) {
 	for n = range str {
 		if tmp = 0; str[n] != "" {
 			if tmp, err = strconv.ParseInt(str[n], 10, 64); err != nil {
-				err = Errors().FilterValueType.Bind(str[n], "int64", err)
+				err = Errors().FilterValueType.Bind(str[n], typeInt64Name, err)
 				return
 			}
 		}
@@ -99,6 +100,7 @@ func (fvo FilterValue) SliceInt64() (ret []int64, err error) {
 
 // SliceUint64 Представления значения в виде среза uint64.
 func (fvo FilterValue) SliceUint64() (ret []uint64, err error) {
+	const typeUint64Name = "uint64"
 	var (
 		n   int
 		str []string
@@ -110,7 +112,7 @@ func (fvo FilterValue) SliceUint64() (ret []uint64, err error) {
 	for n = range str {
 		if tmp = 0; str[n] != "" {
 			if tmp, err = strconv.ParseUint(str[n], 10, 64); err != nil {
-				err = Errors().FilterValueType.Bind(str[n], "uint64", err)
+				err = Errors().FilterValueType.Bind(str[n], typeUint64Name, err)
 				return
 			}
 		}

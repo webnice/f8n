@@ -1,13 +1,16 @@
 package f8n
 
 // New Конструктор объекта сущности пакета, возвращается интерфейс пакета.
-func New() Interface {
-	var f8n = &impl{
+func New() (ret Interface) {
+	var f8n *impl
+
+	f8n = &impl{
 		Datatype: make(Datatype),
 		Remap:    make(Remap),
 	}
+	ret = f8n
 
-	return f8n
+	return
 }
 
 // Errors Справочник ошибок.
