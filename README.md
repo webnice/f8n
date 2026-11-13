@@ -2,7 +2,7 @@
 
 ---
 [![GoDoc](https://godoc.org/github.com/webnice/f8n?status.png)](https://godoc.org/github.com/webnice/f8n)
-[![Coverage Status](https://coveralls.io/repos/github/webnice/f8n/badge.svg?branch=master)](https://coveralls.io/github/webnice/f8n?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/webnice/f8n/badge.svg?branch=master%0Av1)](https://coveralls.io/github/webnice/f8n?branch=master%0Av1)
 
 ### filtration -> f[iltratio]n -> f[8]n -> f8n
 
