@@ -6,7 +6,7 @@ import (
 	runtimeDebug "runtime/debug"
 
 	"github.com/webnice/dic"
-	kitModuleAns "github.com/webnice/kit/v4/module/ans"
+	kitModuleAns "github.com/webnice/kit/v5/module/ans"
 )
 
 // ParseRequest Загрузка настроек фильтрации из запроса http.Request.

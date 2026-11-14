@@ -3,7 +3,7 @@ package f8n
 import (
 	"strings"
 
-	kitModuleAns "github.com/webnice/kit/v4/module/ans"
+	kitModuleAns "github.com/webnice/kit/v5/module/ans"
 )
 
 // Анализатор, выделение сущности, проверка.

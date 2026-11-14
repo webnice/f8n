@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	kitModuleAns "github.com/webnice/kit/v4/module/ans"
+	kitModuleAns "github.com/webnice/kit/v5/module/ans"
 )
 
 // ParseTie Загрузка устаревшего режима фильтрации - tie.

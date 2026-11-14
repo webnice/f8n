@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	kitModuleAns "github.com/webnice/kit/v4/module/ans"
+	kitModuleAns "github.com/webnice/kit/v5/module/ans"
 )
 
 // Origin Структура константы описывающей происхождение тега.

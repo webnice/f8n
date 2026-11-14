@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	kitModuleAns "github.com/webnice/kit/v4/module/ans"
+	kitModuleAns "github.com/webnice/kit/v5/module/ans"
 )
 
 // ParseLimit Загрузка лимита.
